@@ -19,7 +19,6 @@ const BIO_TEXT = [
 ];
 
 const NEWS: StoryItem[] = [
- const NEWS: StoryItem[] = [
   {
     source: "ChatGPT for Education",
     title: "Authored Substack Post on Education for OpenAI",
