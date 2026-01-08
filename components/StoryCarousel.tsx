@@ -1,4 +1,4 @@
-// components/StoryCarousel.tsx
+// components/StoryCarousel.tsx (drop-in replacement)
 "use client";
 
 import Image from "next/image";
@@ -11,21 +11,15 @@ export type StoryItem = {
   source?: string;
   image?: string;
   href?: string;
+  /** if false, do not open in new tab; default: true when href is external */
+  openInNewTab?: boolean;
 };
 
-/**
- * story/news: regular sizes (unchanged)
- */
 const CARD_WIDTH = 253;
 const CARD_GAP = 16;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
-  // narrow, elongated chevron (no stem)
-  const d =
-    direction === "left"
-      ? "M15 6L8.5 12 15 18"
-      : "M9 6l6.5 6L9 18";
-
+  const d = direction === "left" ? "M15 6L8.5 12 15 18" : "M9 6l6.5 6L9 18";
   return (
     <svg
       aria-hidden
@@ -42,6 +36,10 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
       />
     </svg>
   );
+}
+
+function isExternal(href: string) {
+  return /^https?:\/\//i.test(href);
 }
 
 export default function StoryCarousel({ items }: { items: StoryItem[] }) {
@@ -69,7 +67,6 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
 
   return (
     <div className="relative">
-      {/* bleed into BOTH left + right buffers */}
       <div className="relative -mx-6 sm:-mx-10">
         <div className="overflow-hidden px-6 sm:px-10">
           <motion.div
@@ -125,12 +122,16 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
                 );
               }
 
+              const external = isExternal(item.href);
+              const openInNewTab =
+                item.openInNewTab ?? (external ? true : false);
+
               return (
                 <Link
                   key={`${item.href}-${i}`}
                   href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target={openInNewTab ? "_blank" : undefined}
+                  rel={openInNewTab ? "noopener noreferrer" : undefined}
                   className="flex-shrink-0 focus-visible:outline-none"
                 >
                   {Card}
@@ -140,13 +141,12 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
           </motion.div>
         </div>
 
-        {/* arrows on bezels (close to edge, not touching) */}
         {canPrev && (
           <button
             type="button"
             aria-label="previous"
             onClick={goPrev}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute left-0 top-1/2 -translate-y-1/2 translate-x-3 sm:translate-x-5 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="left" />
           </button>
@@ -157,7 +157,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
             type="button"
             aria-label="next"
             onClick={goNext}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute right-0 top-1/2 -translate-y-1/2 -translate-x-3 sm:-translate-x-5 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="right" />
           </button>
@@ -166,3 +166,4 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
     </div>
   );
 }
+
