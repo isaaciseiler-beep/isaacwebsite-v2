@@ -1,8 +1,9 @@
+// app/layout.tsx
 import "./globals.css";
 
 export const metadata = {
   title: "Isaac Seiler",
-  description: "Isaac's site",
+  description: "Isaac Seiler's site",
 };
 
 export default function RootLayout({
