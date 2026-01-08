@@ -1,3 +1,4 @@
+// components/PhotoCarousel.tsx
 "use client";
 
 import Image from "next/image";
@@ -11,8 +12,32 @@ export type PhotoItem = {
   href?: string;
 };
 
-const CARD_WIDTH = 320;
+// requested: photos +50% taller, 20% narrower
+const CARD_WIDTH = 256; // 320 * 0.8
 const CARD_GAP = 16;
+
+function Chevron({ direction }: { direction: "left" | "right" }) {
+  // elongated v-shaped arrow (chevron), no stem
+  const d =
+    direction === "left" ? "M15.5 5.5L7 12l8.5 6.5" : "M8.5 5.5L17 12l-8.5 6.5";
+
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="h-7 w-7 filter drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]"
+    >
+      <path
+        d={d}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
   const reduce = useReducedMotion();
@@ -56,15 +81,16 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
           >
             {items.map((item, i) => {
               const Card = (
-                <article className="w-[320px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.14)]">
-                  <div className="relative w-full aspect-video">
+                <article className="w-[256px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.14)]">
+                  {/* was aspect-video (16/9); +50% taller => 16/13.5 */}
+                  <div className="relative w-full aspect-[16/13.5]">
                     {item.image ? (
                       <Image
                         src={item.image}
                         alt={item.location}
                         fill
                         className="object-cover"
-                        sizes="320px"
+                        sizes="256px"
                         priority={i < 2}
                       />
                     ) : (
@@ -108,9 +134,9 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="previous"
             onClick={goPrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-black backdrop-blur transition hover:bg-white"
+            className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-transparent p-3 text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
-            ←
+            <Chevron direction="left" />
           </button>
         )}
 
@@ -119,9 +145,9 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="next"
             onClick={goNext}
-            className="absolute right-6 sm:right-10 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-black backdrop-blur transition hover:bg-white"
+            className="absolute right-6 sm:right-10 top-1/2 -translate-y-1/2 rounded-full bg-transparent p-3 text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
-            →
+            <Chevron direction="right" />
           </button>
         )}
       </div>
