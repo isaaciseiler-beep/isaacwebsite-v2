@@ -1,6 +1,8 @@
 // components/Main.tsx (drop-in replacement)
 "use client";
 
+import { Suspense } from "react";
+
 import Brand from "./Brand";
 import HeaderGradient from "./HeaderGradient";
 import FooterGradient from "./FooterGradient";
@@ -114,7 +116,10 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default function Main() {
   return (
     <main className="min-h-[100svh] bg-neutral-900 text-neutral-50">
-      <ProjectModal />
+      <Suspense fallback={null}>
+        <ProjectModal />
+      </Suspense>
+
       <Brand />
       <HeaderGradient />
       <FooterGradient />
@@ -178,4 +183,3 @@ export default function Main() {
     </main>
   );
 }
-
