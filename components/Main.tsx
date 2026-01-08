@@ -11,12 +11,18 @@ import StoryCarousel, { type StoryItem } from "./StoryCarousel";
 const R2_BASE = "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev";
 
 const BIO_TEXT = [
-  "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of ChatGPT Lab at OpenAI.",
-  "I've directed a communications program on Capitol Hill, published work through OpenAI, set up a congressional office, run my own consultancy, and conducted AI workshops for educators.",
+  "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of OpenAI's ChatGPT Lab.",
+  "I've managed programs on for a Member of Congress, published work with OpenAI, built a congressional office, founded my own consultancy, and led AI workshops for educators.",
   "I'm currently in the market for tech roles starting Summer 2026.",
 ];
 
 const NEWS: StoryItem[] = [
+  {
+    source: "ChatGPT for Education",
+    title: "Authored Substack Post on Education for OpenAI",
+    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/chatlab.jpg`,
+    href: "https://edunewsletter.openai.com/p/top-chats-from-the-fulbright-taiwan",
+  },
   {
     source: "OpenAI",
     title: "Testimonial Featured in ChatGPT Pulse Launch",
