@@ -12,8 +12,8 @@ export type ProjectTemplate = {
   subtitle?: string;
   source?: string;
 
-  coverSlot?: ReactNode; // vertical cover used in carousel card later
-  headerSlot?: ReactNode; // horizontal header shown inside modal
+  coverSlot?: ReactNode;
+  headerSlot?: ReactNode;
 
   body: ReactNode;
 };
@@ -52,105 +52,45 @@ function ImageHold({
 const FAKE_ESSAY = (
   <div className="space-y-8">
     <p>
-      This is a deliberately long placeholder essay to verify that the modal body
-      scrolls smoothly and that the header stays fixed. Treat the content as a
-      visual/interaction test: the paragraphs are varied in length, headings
-      break up the flow, and there are lists to ensure spacing is consistent.
+      This is a deliberately long placeholder essay to verify that the entire
+      modal content scrolls as one unit (image, title block, and body).
     </p>
-
     <h3 className="text-lg font-semibold">1. what i mean by “small systems”</h3>
     <p>
       A “small system” is anything that reduces repeated decision-making. It can
       be as simple as a template that forces consistent inputs, or as elaborate
-      as a pipeline that moves information across tools. The point is not
-      complexity—it’s reliability. If the system doesn’t get used on a tired day,
-      it doesn’t count.
+      as a pipeline that moves information across tools.
     </p>
     <p>
       Most personal workflows fail because they ask too much: too many fields,
       too many steps, too much upkeep. A better approach is to keep the core
-      loop short: capture → normalize → decide → log. Once that loop is stable,
-      then you can layer in automation.
+      loop short: capture → normalize → decide → log.
     </p>
-
-    <h3 className="text-lg font-semibold">2. the “capture” layer</h3>
+    <h3 className="text-lg font-semibold">2. more filler for scroll testing</h3>
     <p>
-      Capture is where information arrives: email, DMs, a note on your phone, a
-      form submission, a calendar invite. The capture layer should be forgiving.
-      It should accept messy inputs, because messy inputs are reality.
+      Keep scrolling. The goal is to push content beyond the fold so you can
+      confirm the whole pane scrolls smoothly without jitter.
+    </p>
+    <p>
+      Repeat blocks, headings, and lists should all keep spacing consistent.
     </p>
     <ul className="list-disc space-y-2 pl-5 text-white/85">
-      <li>
-        prefer one inbox per channel, not many (one email label, one notes
-        folder, one sheet)
-      </li>
-      <li>optimize for “can i dump this in 10 seconds”</li>
-      <li>don’t require perfect categorization at capture time</li>
+      <li>image scrolls away with the rest</li>
+      <li>title/subtitle scroll with the body</li>
+      <li>close button stays pinned</li>
     </ul>
-
-    <h3 className="text-lg font-semibold">3. normalization and routing</h3>
     <p>
-      Normalization is where you standardize. Routing is where you decide what
-      happens next. In practice, this is where most value is created, because it
-      prevents drift: two different names for the same thing, missing context,
-      unclear status, or tasks that vanish.
+      End of placeholder. Replace with real writing whenever you’re ready.
     </p>
-    <p>
-      A good schema is small: name, source, status, next action, timestamp, and
-      a link back to origin. If you can’t answer “what is this, where did it
-      come from, and what happens next” in one glance, the schema is too loose.
-    </p>
-
-    <h3 className="text-lg font-semibold">4. the human-in-the-loop step</h3>
-    <p>
-      Automation without review becomes noise. A lightweight review step—once a
-      day or once a week—keeps systems aligned with reality. The key is that the
-      review should be short, predictable, and focused on resolving ambiguity:
-      confirm statuses, rewrite next actions, close loops.
-    </p>
-
-    <h3 className="text-lg font-semibold">5. why this matters</h3>
-    <p>
-      When you remove repetitive work, you don’t just save time—you reduce the
-      number of times you have to renegotiate your own intentions. That shows up
-      as steadier follow-through, fewer missed opportunities, and less mental
-      overhead.
-    </p>
-    <p>
-      If you’re reading this in the modal: keep scrolling. The goal is to push
-      the content beyond the fold so you can confirm that scrolling feels
-      natural, the scrollbar appears, and the header image remains anchored.
-    </p>
-
-    <h3 className="text-lg font-semibold">6. extra filler for scroll testing</h3>
-    <p>
-      The rest of this essay is intentionally repetitive in structure: paragraph
-      blocks with comfortable line length, consistent spacing, and occasional
-      emphasis. You should be able to scroll without any jitter, and closing the
-      modal should fade smoothly without snapping the underlying page position.
-    </p>
-    <p>
-      A modal like this works best when it feels like a “window” rather than a
-      page navigation. That means: stable sizing, stable header, stable close
-      affordance, and no scroll jumps. The transitions should be present but
-      subtle—quick enough to feel responsive, slow enough to feel intentional.
-    </p>
-    <p>
-      Scrolling should not “fight” the page behind. The background should remain
-      exactly where it was when opened, and return there when closed, without
-      re-anchoring to the carousel.
-    </p>
-    <p>
-      If everything is behaving, you’ve now verified: (1) long content scrolls,
-      (2) header stays fixed, (3) fade/blur transitions work, (4) background
-      position is preserved, and (5) close button placement feels correct.
-    </p>
-
-    <h3 className="text-lg font-semibold">7. last chunk</h3>
-    <p>
-      End of placeholder. Replace with real writing whenever you’re ready; the
-      layout should hold up to headings, lists, and long-form text.
-    </p>
+    {/* extra length */}
+    <div className="space-y-6">
+      {Array.from({ length: 18 }).map((_, i) => (
+        <p key={i}>
+          Extra paragraph {i + 1}. This is additional filler to ensure the
+          scroll area is undeniably long.
+        </p>
+      ))}
+    </div>
   </div>
 );
 
@@ -162,7 +102,7 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     source: "Project",
     coverSlot: <ImageHold variant="cover" label="cover hold" />,
     headerSlot: <ImageHold variant="header" label="header hold" />,
-    body: FAKE_ESSAY, // filled with long fake essay to test scrolling
+    body: FAKE_ESSAY,
   },
   {
     slug: "chatgpt-local-lab",
@@ -262,9 +202,10 @@ export default function ProjectModal() {
     const qs = next.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
 
-    // restore background scroll position after route update
     const y = scrollYRef.current || 0;
-    requestAnimationFrame(() => window.scrollTo({ top: y, left: 0, behavior: "auto" }));
+    requestAnimationFrame(() =>
+      window.scrollTo({ top: y, left: 0, behavior: "auto" })
+    );
   };
 
   useEffect(() => {
@@ -289,7 +230,7 @@ export default function ProjectModal() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
         >
-          {/* backdrop (fade + blur) */}
+          {/* backdrop */}
           <motion.div
             className="absolute inset-0 bg-black/55 backdrop-blur-md"
             initial={{ opacity: 0 }}
@@ -306,9 +247,8 @@ export default function ProjectModal() {
               "w-[min(92vw,900px)]",
               "h-[min(84vh,720px)]",
               "overflow-hidden rounded-3xl",
-              "border border-white/10 bg-neutral-950", // solid
+              "border border-white/10 bg-neutral-950",
               "shadow-[0_0_60px_rgba(0,0,0,0.55)]",
-              "flex flex-col",
             ].join(" ")}
             initial={{ opacity: 0, y: 10, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -316,29 +256,30 @@ export default function ProjectModal() {
             transition={{ duration: 0.18, ease: "easeOut" }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            {/* close button (borderless, floating above header) */}
+            {/* close button: no border, no background */}
             <button
               type="button"
               onClick={close}
               aria-label="close"
               className={[
                 "absolute right-4 top-4 z-20",
-                "grid h-10 w-10 place-items-center rounded-full",
-                "bg-black/35 text-white/85",
-                "hover:bg-black/55 hover:text-white",
-                "shadow-[0_10px_30px_rgba(0,0,0,0.45)]",
+                "p-2",
+                "text-white/75 hover:text-white",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
               ].join(" ")}
             >
               <span className="text-2xl leading-none">×</span>
             </button>
 
-            {/* header image frame (~10% taller), fills area, bottom divider */}
-            <div className="px-6 pt-6">
+            {/* single scroll container: EVERYTHING scrolls */}
+            <div className="h-full overflow-y-auto">
+              {/* header image: flush to pane edges (no padding), only bottom border */}
               <div
                 className={[
-                  "w-full overflow-hidden rounded-2xl",
-                  "border border-white/10",
-                  "h-[206px] sm:h-[258px]", // ~10% taller than 44/52 (176/208)
+                  "w-full",
+                  "h-[206px] sm:h-[258px]", // ~10% taller
+                  "overflow-hidden",
+                  "border-b border-white/10", // straight border only at bottom
                 ].join(" ")}
               >
                 {project.headerSlot ? (
@@ -348,29 +289,26 @@ export default function ProjectModal() {
                 )}
               </div>
 
-              {/* divider between header image and text */}
-              <div className="mt-5 border-b border-white/10" />
+              {/* content padding starts BELOW the image */}
+              <div className="px-6 py-7">
+                {project.source && (
+                  <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/60">
+                    {project.source}
+                  </div>
+                )}
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                  {project.title}
+                </h2>
+                {project.subtitle && (
+                  <p className="mt-1 text-sm text-white/65">{project.subtitle}</p>
+                )}
 
-              <div className="mt-5 flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  {project.source && (
-                    <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/60">
-                      {project.source}
-                    </div>
-                  )}
-                  <h2 className="mt-2 truncate text-2xl font-semibold tracking-tight">
-                    {project.title}
-                  </h2>
-                  {project.subtitle && (
-                    <p className="mt-1 text-sm text-white/65">{project.subtitle}</p>
-                  )}
+                <div className="mt-7 border-b border-white/10" />
+
+                <div className="mt-7 prose prose-invert max-w-none">
+                  {project.body}
                 </div>
               </div>
-            </div>
-
-            {/* scrollable content */}
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-              <div className="prose prose-invert max-w-none">{project.body}</div>
             </div>
           </motion.div>
         </motion.div>
