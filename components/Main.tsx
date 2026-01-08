@@ -1,8 +1,8 @@
-// components/Main.tsx (DROP-IN REPLACEMENT)
+// components/Main.tsx
 "use client";
 
 import { Suspense, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Brand from "./Brand";
 import HeaderGradient from "./HeaderGradient";
@@ -121,73 +121,92 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ScrollPreserver() {
-  const searchParams = useSearchParams();
-  const isProjectOpen = Boolean(searchParams.get("project"));
-  const prevOpenRef = useRef(isProjectOpen);
+/**
+ * intercepts clicks on `/?project=...` links so next can't auto-scroll.
+ * stores the scroll position that must be restored on close.
+ */
+function ProjectLinkInterceptor() {
+  const router = useRouter();
 
-  // capture scroll BEFORE any click navigates to ?project=
   useEffect(() => {
     const onClickCapture = (e: MouseEvent) => {
+      if (e.defaultPrevented) return;
+      if (e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
       const target = e.target as HTMLElement | null;
       const a = target?.closest?.("a") as HTMLAnchorElement | null;
       if (!a) return;
 
-      const href = a.getAttribute("href") || "";
-      if (!href.includes("?project=")) return;
+      const hrefAttr = a.getAttribute("href") || "";
+      if (!hrefAttr) return;
 
-      sessionStorage.setItem("__bg_scroll_y_open__", String(window.scrollY || 0));
+      let url: URL;
+      try {
+        url = new URL(hrefAttr, window.location.href);
+      } catch {
+        return;
+      }
+
+      if (url.origin !== window.location.origin) return;
+      if (!url.searchParams.has("project")) return;
+
+      // store where we were before opening
+      sessionStorage.setItem("__project_bg_y__", String(window.scrollY || 0));
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      router.replace(url.pathname + url.search, { scroll: false });
     };
 
     document.addEventListener("click", onClickCapture, true);
     return () => document.removeEventListener("click", onClickCapture, true);
-  }, []);
+  }, [router]);
 
-  // restore after OPEN (prevents “jump to top” on open)
-  useEffect(() => {
-    if (!isProjectOpen) return;
+  return null;
+}
 
-    const raw = sessionStorage.getItem("__bg_scroll_y_open__");
-    if (!raw) return;
+/**
+ * restores scroll after the modal closes (after `project` param is gone).
+ * multi-pass restore prevents next/app router from overriding it.
+ */
+function ScrollRestoreOnClose() {
+  const searchParams = useSearchParams();
+  const isOpen = Boolean(searchParams.get("project"));
+  const prevOpenRef = useRef(isOpen);
 
-    const y = Number(raw);
-    sessionStorage.removeItem("__bg_scroll_y_open__");
-
-    // double-raf reduces first-open jitter
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: Number.isFinite(y) ? y : 0,
-          left: 0,
-          behavior: "auto",
-        });
-      });
-    });
-  }, [isProjectOpen]);
-
-  // restore after CLOSE (prevents “return to top” on close)
   useEffect(() => {
     const prev = prevOpenRef.current;
-    prevOpenRef.current = isProjectOpen;
+    prevOpenRef.current = isOpen;
 
-    if (!prev || isProjectOpen) return;
+    // only run on transition open -> closed
+    if (!prev || isOpen) return;
 
-    const raw = sessionStorage.getItem("__bg_scroll_y_close__");
+    const raw =
+      sessionStorage.getItem("__project_restore_y__") ??
+      sessionStorage.getItem("__project_bg_y__");
+
     if (!raw) return;
 
     const y = Number(raw);
-    sessionStorage.removeItem("__bg_scroll_y_close__");
+    sessionStorage.removeItem("__project_restore_y__");
+
+    const apply = () => {
+      window.scrollTo({
+        top: Number.isFinite(y) ? y : 0,
+        left: 0,
+        behavior: "auto",
+      });
+    };
 
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: Number.isFinite(y) ? y : 0,
-          left: 0,
-          behavior: "auto",
-        });
-      });
+      apply();
+      requestAnimationFrame(apply);
     });
-  }, [isProjectOpen]);
+    setTimeout(apply, 0);
+    setTimeout(apply, 50);
+  }, [isOpen]);
 
   return null;
 }
@@ -195,8 +214,10 @@ function ScrollPreserver() {
 export default function Main() {
   return (
     <main className="min-h-[100svh] bg-neutral-900 text-neutral-50">
+      <ProjectLinkInterceptor />
+
       <Suspense fallback={null}>
-        <ScrollPreserver />
+        <ScrollRestoreOnClose />
       </Suspense>
 
       <Suspense fallback={null}>
