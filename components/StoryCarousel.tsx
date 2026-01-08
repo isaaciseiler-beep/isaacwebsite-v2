@@ -1,3 +1,4 @@
+// components/StoryCarousel.tsx
 "use client";
 
 import Image from "next/image";
@@ -15,11 +16,7 @@ export type StoryItem = {
 const CARD_WIDTH = 253;
 const CARD_GAP = 16;
 
-export default function StoryCarousel({
-  items,
-}: {
-  items: StoryItem[];
-}) {
+export default function StoryCarousel({ items }: { items: StoryItem[] }) {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
 
@@ -40,21 +37,19 @@ export default function StoryCarousel({
   const goNext = () => setIndex((prev) => Math.min(maxIndex, prev + 1));
 
   if (count === 0) {
-    return (
-      <div className="text-sm text-black/60">no items yet.</div>
-    );
+    return <div className="text-sm text-neutral-50/60">No items yet.</div>;
   }
 
   return (
     <div className="relative">
-      {/* left fade only (no right bezel) */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white via-white/70 to-transparent sm:w-16 md:w-20" />
+      {/* full-bleed scroller with internal padding (keeps page buffer, avoids right-side strip) */}
+      <div className="relative -mx-4 sm:-mx-6">
+        {/* left fade only (no right bezel) */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-neutral-900 via-neutral-900/70 to-transparent sm:w-16 md:w-20" />
 
-      {/* cancel the page's right padding only for this scroller */}
-      <div className="-mr-4 sm:-mr-6">
-        <div className="overflow-hidden">
+        <div className="overflow-hidden px-4 sm:px-6">
           <motion.div
-            className="flex gap-4"
+            className="flex gap-4 pr-4 sm:pr-6"
             animate={{ x: -index * (CARD_WIDTH + CARD_GAP) }}
             transition={slideTransition}
             drag="x"
@@ -126,7 +121,7 @@ export default function StoryCarousel({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between text-xs text-black/60">
+      <div className="mt-4 flex items-center justify-between text-xs text-neutral-50/60">
         <div className="flex items-center gap-2">
           <CarouselNavButton dir="left" onClick={goPrev} disabled={!canPrev} />
           <CarouselNavButton dir="right" onClick={goNext} disabled={!canNext} />
@@ -157,8 +152,8 @@ function CarouselNavButton({
       className={[
         "grid h-9 w-9 place-items-center text-xs transition-colors focus-visible:outline-none",
         disabled
-          ? "cursor-not-allowed text-black/25"
-          : "text-black/60 hover:text-black",
+          ? "cursor-not-allowed text-neutral-50/25"
+          : "text-neutral-50/60 hover:text-neutral-50",
       ].join(" ")}
     >
       {dir === "left" ? "←" : "→"}
