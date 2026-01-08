@@ -39,8 +39,9 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
   return (
     <div className="relative">
-      <div className="relative -mx-4 sm:-mx-6">
-        <div className="overflow-hidden px-4 sm:px-6">
+      {/* extend only to the right (matches logo buffers); no negative left margin */}
+      <div className="relative -mr-6 sm:-mr-10">
+        <div className="overflow-hidden pr-6 sm:pr-10">
           <motion.div
             className="flex gap-4"
             animate={{ x: -index * (CARD_WIDTH + CARD_GAP) }}
@@ -107,7 +108,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="previous"
             onClick={goPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-black backdrop-blur transition hover:bg-white"
+            className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-black backdrop-blur transition hover:bg-white"
           >
             ←
           </button>
@@ -118,7 +119,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="next"
             onClick={goNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-black backdrop-blur transition hover:bg-white"
+            className="absolute right-6 sm:right-10 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-black backdrop-blur transition hover:bg-white"
           >
             →
           </button>
