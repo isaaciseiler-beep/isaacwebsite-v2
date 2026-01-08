@@ -13,14 +13,19 @@ export type StoryItem = {
   href?: string;
 };
 
-// requested: photos +50% taller, 20% narrower
-const CARD_WIDTH = 202; // 253 * 0.8 ≈ 202
+/**
+ * RESTORED DEFAULT SIZES
+ * width: ~253px
+ * height: ~368px mobile / ~414px md
+ */
+const CARD_WIDTH = 253;
 const CARD_GAP = 16;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
-  // elongated v-shaped arrow (chevron), no stem
   const d =
-    direction === "left" ? "M15.5 5.5L7 12l8.5 6.5" : "M8.5 5.5L17 12l-8.5 6.5";
+    direction === "left"
+      ? "M15.5 5.5L7 12l8.5 6.5"
+      : "M8.5 5.5L17 12l-8.5 6.5";
 
   return (
     <svg
@@ -65,7 +70,6 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
 
   return (
     <div className="relative">
-      {/* extend only to the right (matches logo buffers); no negative left margin */}
       <div className="relative -mr-6 sm:-mr-10">
         <div className="overflow-hidden pr-6 sm:pr-10">
           <motion.div
@@ -82,7 +86,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
           >
             {items.map((item, i) => {
               const Card = (
-                <article className="h-[552px] w-[202px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.18)] md:h-[621px]">
+                <article className="h-[368px] w-[253px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.18)] md:h-[414px]">
                   <div className="relative h-full w-full">
                     {item.image ? (
                       <Image
@@ -90,7 +94,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
                         alt={item.title}
                         fill
                         className="object-cover"
-                        sizes="202px"
+                        sizes="253px"
                         priority={i < 2}
                       />
                     ) : (
@@ -99,7 +103,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
 
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                    <div className="absolute inset-x-0 bottom-0 p-4 text-left">
+                    <div className="absolute inset-x-0 bottom-0 p-4">
                       {item.source && (
                         <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/75">
                           {item.source}
@@ -115,7 +119,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
 
               if (!item.href) {
                 return (
-                  <div key={`${item.title}-${i}`} className="block flex-shrink-0">
+                  <div key={`${item.title}-${i}`} className="flex-shrink-0">
                     {Card}
                   </div>
                 );
@@ -127,7 +131,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block flex-shrink-0 focus-visible:outline-none"
+                  className="flex-shrink-0 focus-visible:outline-none"
                 >
                   {Card}
                 </Link>
@@ -141,7 +145,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
             type="button"
             aria-label="previous"
             onClick={goPrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-transparent p-3 text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-transparent p-3 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="left" />
           </button>
@@ -152,7 +156,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
             type="button"
             aria-label="next"
             onClick={goNext}
-            className="absolute right-6 sm:right-10 top-1/2 -translate-y-1/2 rounded-full bg-transparent p-3 text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute right-6 sm:right-10 top-1/2 -translate-y-1/2 bg-transparent p-3 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="right" />
           </button>
@@ -161,3 +165,4 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
     </div>
   );
 }
+
