@@ -42,9 +42,7 @@ function FooterButton({
 
 export default function Footer() {
   const year = new Date().getFullYear();
-
-  // update if your repo changes
-  const repoUrl = "https://github.com/isaaciseiler-beep/finalfinalsite";
+  const repoUrl = "https://github.com/isaaciseiler-beep/newtempsite";
 
   return (
     <footer className="relative z-50 pt-10">
@@ -59,9 +57,7 @@ export default function Footer() {
             <FooterButton href="https://www.linkedin.com/in/isaacseiler/">
               LinkedIn
             </FooterButton>
-            <FooterButton href="mailto:isaacseiler@gmail.com">
-              Contact
-            </FooterButton>
+            <FooterButton href="mailto:isaacseiler@gmail.com">Contact</FooterButton>
           </div>
         </div>
 
