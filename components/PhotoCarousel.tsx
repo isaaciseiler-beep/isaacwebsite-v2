@@ -12,14 +12,20 @@ export type PhotoItem = {
   href?: string;
 };
 
-// requested: photos +50% taller, 20% narrower
-const CARD_WIDTH = 256; // 320 * 0.8
+/**
+ * photos section only:
+ * +50% height, -20% width
+ * previous base width ≈ 320px → 256px
+ * aspect 16/9 → 16/13.5
+ */
+const CARD_WIDTH = 256;
 const CARD_GAP = 16;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
-  // elongated v-shaped arrow (chevron), no stem
   const d =
-    direction === "left" ? "M15.5 5.5L7 12l8.5 6.5" : "M8.5 5.5L17 12l-8.5 6.5";
+    direction === "left"
+      ? "M15.5 5.5L7 12l8.5 6.5"
+      : "M8.5 5.5L17 12l-8.5 6.5";
 
   return (
     <svg
@@ -64,7 +70,6 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
   return (
     <div className="relative">
-      {/* extend only to the right (matches logo buffers); no negative left margin */}
       <div className="relative -mr-6 sm:-mr-10">
         <div className="overflow-hidden pr-6 sm:pr-10">
           <motion.div
@@ -82,7 +87,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             {items.map((item, i) => {
               const Card = (
                 <article className="w-[256px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.14)]">
-                  {/* was aspect-video (16/9); +50% taller => 16/13.5 */}
+                  {/* taller photos */}
                   <div className="relative w-full aspect-[16/13.5]">
                     {item.image ? (
                       <Image
@@ -108,7 +113,10 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
               if (!item.href) {
                 return (
-                  <div key={`${item.location}-${i}`} className="block flex-shrink-0">
+                  <div
+                    key={`${item.location}-${i}`}
+                    className="block flex-shrink-0"
+                  >
                     {Card}
                   </div>
                 );
@@ -134,7 +142,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="previous"
             onClick={goPrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-transparent p-3 text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-transparent p-3 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="left" />
           </button>
@@ -145,7 +153,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="next"
             onClick={goNext}
-            className="absolute right-6 sm:right-10 top-1/2 -translate-y-1/2 rounded-full bg-transparent p-3 text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute right-6 sm:right-10 top-1/2 -translate-y-1/2 bg-transparent p-3 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="right" />
           </button>
