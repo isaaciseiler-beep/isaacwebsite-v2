@@ -8,7 +8,7 @@ import StoryCarousel, { type StoryItem } from "./StoryCarousel";
 
 const R2_BASE = "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev";
 
-const BIO =
+const ABOUT =
   "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of ChatGPT Lab at OpenAI. I've directed a communications program on Capitol Hill, published work through OpenAI, set up a congressional office, run my own consultancy, and conducted AI workshops for educators. I'm currently in the market for tech roles starting Summer 2026.";
 
 const NEWS: StoryItem[] = [
@@ -71,6 +71,10 @@ const PROJECTS: StoryItem[] = [
   { title: "Replace with another project", source: "Project" },
 ];
 
+/**
+ * note: keep these as-is if your real photo data is coming from elsewhere.
+ * PhotoCarousel now supports item.image again, so your existing data should show.
+ */
 const PHOTOS: PhotoItem[] = [
   { location: "New York" },
   { location: "St. Louis" },
@@ -92,19 +96,22 @@ export default function Main() {
       <Brand />
 
       <div className="w-full overflow-x-hidden px-4 sm:px-6 pt-[132px] md:pt-[152px] pb-16">
-        {/* bio */}
+        {/* about me */}
         <section
-          id="bio"
+          id="about"
           className="scroll-mt-24 min-h-[calc(100svh-180px)] md:min-h-[calc(100svh-210px)] flex flex-col justify-end"
         >
           <div className="mb-3">
-            <SectionTitle>Bio</SectionTitle>
+            <SectionTitle>About Me</SectionTitle>
           </div>
-          <p className="w-full text-[2.1rem] leading-[1.15] text-neutral-50/85 md:text-[2.6rem]">
-            {BIO}
+
+          {/* about text matches header size */}
+          <p className="w-full text-4xl font-normal leading-[1.05] tracking-tight text-neutral-50/85 md:text-6xl">
+            {ABOUT}
           </p>
         </section>
 
+        {/* keep parallax motion but avoid big gaps; divider itself is invisible */}
         <ParallaxDivider amount={-18} />
 
         {/* news */}
