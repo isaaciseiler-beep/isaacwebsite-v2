@@ -1,291 +1,262 @@
-// components/ProjectModal.tsx (DROP-IN REPLACEMENT)
+// components/Main.tsx (DROP-IN REPLACEMENT)
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import type { ReactNode } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { Suspense, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 
-export type ProjectTemplate = {
-  slug: string;
-  title: string;
-  subtitle?: string;
-  source?: string;
+import Brand from "./Brand";
+import HeaderGradient from "./HeaderGradient";
+import FooterGradient from "./FooterGradient";
+import Footer from "./Footer";
+import ParallaxDivider from "./ParallaxDivider";
+import PhotoCarousel, { type PhotoItem } from "./PhotoCarousel";
+import StoryCarousel, { type StoryItem } from "./StoryCarousel";
+import ProjectModal, { PROJECT_TEMPLATES } from "./ProjectModal";
 
-  coverSlot?: ReactNode;
-  headerSlot?: ReactNode;
+const BIO_TEXT = [
+  "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of OpenAI's ChatGPT Lab.",
+  "I've managed programs on for a Member of Congress, published work with OpenAI, built a congressional office, founded my own consultancy, and led AI workshops for educators.",
+  "I'm currently in the market for tech roles starting Summer 2026.",
+];
 
-  body: ReactNode;
-};
-
-function ImageHold({
-  variant,
-  label,
-}: {
-  variant: "cover" | "header";
-  label: string;
-}) {
-  const cls =
-    variant === "cover"
-      ? "h-[160px] w-[118px] rounded-2xl"
-      : "h-full w-full";
-
-  return (
-    <div
-      className={[
-        "relative overflow-hidden",
-        "border border-white/10 bg-white/5",
-        "shadow-[0_0_18px_rgba(0,0,0,0.25)]",
-        cls,
-      ].join(" ")}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5" />
-      <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
-        <div className="text-xs uppercase tracking-[0.22em] text-white/55">
-          {label}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const FAKE_ESSAY = (
-  <div className="space-y-8">
-    <p>
-      This is a deliberately long placeholder essay to verify that the entire
-      modal content scrolls as one unit (image, title block, and body).
-    </p>
-    <h3 className="text-lg font-semibold">1. what i mean by “small systems”</h3>
-    <p>
-      A “small system” is anything that reduces repeated decision-making. It can
-      be as simple as a template that forces consistent inputs, or as elaborate
-      as a pipeline that moves information across tools.
-    </p>
-    <div className="space-y-6">
-      {Array.from({ length: 22 }).map((_, i) => (
-        <p key={i}>
-          Extra paragraph {i + 1}. This is additional filler to ensure the scroll
-          area is undeniably long.
-        </p>
-      ))}
-    </div>
-  </div>
-);
-
-export const PROJECT_TEMPLATES: ProjectTemplate[] = [
+const NEWS: StoryItem[] = [
   {
-    slug: "ops-automation-stack",
-    title: "Ops Automation Stack",
-    subtitle: "How I build small systems that remove repetitive work.",
-    source: "Project",
-    coverSlot: <ImageHold variant="cover" label="cover hold" />,
-    headerSlot: <ImageHold variant="header" label="header hold" />,
-    body: FAKE_ESSAY,
+    source: "ChatGPT for Education",
+    title: "Authored Substack Post on Education for OpenAI",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/chatlab.jpg",
+    href: "https://edunewsletter.openai.com/p/top-chats-from-the-fulbright-taiwan",
   },
   {
-    slug: "chatgpt-local-lab",
-    title: "ChatGPT Local Lab",
-    subtitle: "Workshops + experiments with educators in Taiwan.",
-    source: "Project",
-    coverSlot: <ImageHold variant="cover" label="cover hold" />,
-    headerSlot: <ImageHold variant="header" label="header hold" />,
-    body: (
-      <div className="space-y-6">
-        <p>Practical sessions focused on planning, feedback, and admin tasks.</p>
-      </div>
-    ),
+    source: "OpenAI",
+    title: "Testimonial Featured in ChatGPT Pulse Launch",
+    image: "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/pulse.jpg",
+    href: "https://openai.com/index/introducing-chatgpt-pulse/",
   },
   {
-    slug: "job-signal",
-    title: "Job Signal",
-    subtitle: "Tracking roles, follow-ups, and outreach with one source of truth.",
-    source: "Project",
-    coverSlot: <ImageHold variant="cover" label="cover hold" />,
-    headerSlot: <ImageHold variant="header" label="header hold" />,
-    body: (
-      <div className="space-y-6">
-        <p>
-          A personal system for managing applications and networking without
-          losing context.
-        </p>
-      </div>
-    ),
+    source: "OpenAI",
+    title: "Study Mode Spotlight on ChatGPT's Instagram",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/study-mode.jpg",
+    href: "https://www.instagram.com/chatgpt/reel/DNyG5VvXEZM/",
   },
   {
-    slug: "photo-map",
-    title: "Portfolio Photo Map",
-    subtitle: "A map-first way to browse travel + photography.",
-    source: "Project",
-    coverSlot: <ImageHold variant="cover" label="cover hold" />,
-    headerSlot: <ImageHold variant="header" label="header hold" />,
-    body: (
-      <div className="space-y-6">
-        <p>A UI pattern for browsing large photo libraries by place.</p>
-      </div>
-    ),
+    source: "Washington University in St. Louis",
+    title: "Won 2024 Truman Scholarship",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/truman.jpg",
+    href: "https://source.washu.edu/2024/04/junior-seiler-awarded-truman-scholarship/",
   },
   {
-    slug: "this-site",
-    title: "This Site",
-    subtitle: "A one-page portfolio with a ‘window’ modal for project write-ups.",
-    source: "Project",
-    coverSlot: <ImageHold variant="cover" label="cover hold" />,
-    headerSlot: <ImageHold variant="header" label="header hold" />,
-    body: (
-      <div className="space-y-6">
-        <p>
-          Keep the homepage fast and visual, while letting deeper write-ups open
-          without navigating away.
-        </p>
-      </div>
-    ),
+    source: "OpenAI",
+    title: "Co-Authored 100 Chats Project with the ChatGPT Lab",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/100chats.jpg",
+    href: "https://chatgpt.com/100chats-project",
+  },
+  {
+    source: "Washington University in St. Louis",
+    title: "Named 2024 Rhodes Scholarship Finalist",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/rhodes.jpg",
+    href: "https://source.washu.edu/2024/11/seniors-darden-seiler-were-rhodes-scholars-finalists/",
+  },
+  {
+    source: "Washington University in St. Louis",
+    title: "Won Fulbright Award to Taiwan",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/fulbright.jpg",
+    href: "https://source.wustl.edu/2025/06/several-alumni-earn-fulbright-awards/",
+  },
+  {
+    source: "Student Life",
+    title: "Truman Scholarship Interview",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/trumanisaac.jpg",
+    href: "https://www.studlife.com/news/2024/04/24/isaac-seiler-named-truman-scholar",
+  },
+  {
+    source: "Forbes",
+    title: "60 Truman Scholars Announced (2024)",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/harrytruman.jpg",
+    href: "https://www.forbes.com/sites/michaeltnietzel/2024/04/13/the-truman-scholars-for-2024-are-announced/",
+  },
+  {
+    source: "Missouri College Media Awards",
+    title: "Missouri College Media Awards",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/washuspring.png",
+    href: "https://source.washu.edu/2025/05/student-life-wins-best-newspaper-honor-at-missouri-college-media-awards/",
+  },
+  {
+    source: "Washington University in St. Louis",
+    title: "University Profile",
+    image:
+      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/wustl.jpg",
+    href: "https://artsci.washu.edu/ampersand/isaac-seiler-setting-his-sights-high",
   },
 ];
 
-function useBodyScrollLock(locked: boolean) {
-  useEffect(() => {
-    if (!locked) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [locked]);
+const PROJECTS: StoryItem[] = PROJECT_TEMPLATES.map((p) => ({
+  title: p.title,
+  source: p.source ?? "Project",
+  image: `/image/projects/${p.slug}-cover.jpg`,
+  href: `/?project=${encodeURIComponent(p.slug)}`,
+  openInNewTab: false,
+}));
+
+const PHOTOS: PhotoItem[] = [
+  { location: "New York" },
+  { location: "St. Louis" },
+  { location: "San Francisco" },
+  { location: "Washington, D.C." },
+];
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-left text-4xl font-normal leading-none tracking-tight md:text-6xl">
+      {children}
+    </h2>
+  );
 }
 
-export default function ProjectModal() {
-  const router = useRouter();
-  const pathname = usePathname();
+function ScrollPreserver() {
   const searchParams = useSearchParams();
+  const isProjectOpen = Boolean(searchParams.get("project"));
+  const prevOpenRef = useRef(isProjectOpen);
 
-  const slug = searchParams.get("project");
-  const project = useMemo(
-    () => (slug ? PROJECT_TEMPLATES.find((p) => p.slug === slug) : undefined),
-    [slug]
-  );
-
-  const isOpen = Boolean(project);
-  useBodyScrollLock(isOpen);
-
-  const scrollYRef = useRef(0);
-
+  // capture scroll BEFORE any click navigates to ?project=
   useEffect(() => {
-    if (!isOpen) return;
-    scrollYRef.current = window.scrollY || 0;
-  }, [isOpen]);
+    const onClickCapture = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.("a") as HTMLAnchorElement | null;
+      if (!a) return;
 
-  const close = () => {
-    // hand off the desired restore position to Main (works even if route update delays)
-    sessionStorage.setItem("__bg_scroll_y_close__", String(scrollYRef.current || 0));
+      const href = a.getAttribute("href") || "";
+      if (!href.includes("?project=")) return;
 
-    const next = new URLSearchParams(searchParams.toString());
-    next.delete("project");
-    const qs = next.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      sessionStorage.setItem("__bg_scroll_y_open__", String(window.scrollY || 0));
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
 
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, []);
+
+  // restore after OPEN (prevents “jump to top” on open)
+  useEffect(() => {
+    if (!isProjectOpen) return;
+
+    const raw = sessionStorage.getItem("__bg_scroll_y_open__");
+    if (!raw) return;
+
+    const y = Number(raw);
+    sessionStorage.removeItem("__bg_scroll_y_open__");
+
+    // double-raf reduces first-open jitter
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: Number.isFinite(y) ? y : 0,
+          left: 0,
+          behavior: "auto",
+        });
+      });
+    });
+  }, [isProjectOpen]);
+
+  // restore after CLOSE (prevents “return to top” on close)
+  useEffect(() => {
+    const prev = prevOpenRef.current;
+    prevOpenRef.current = isProjectOpen;
+
+    if (!prev || isProjectOpen) return;
+
+    const raw = sessionStorage.getItem("__bg_scroll_y_close__");
+    if (!raw) return;
+
+    const y = Number(raw);
+    sessionStorage.removeItem("__bg_scroll_y_close__");
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: Number.isFinite(y) ? y : 0,
+          left: 0,
+          behavior: "auto",
+        });
+      });
+    });
+  }, [isProjectOpen]);
+
+  return null;
+}
+
+export default function Main() {
   return (
-    <AnimatePresence>
-      {project ? (
-        <motion.div
-          className="fixed inset-0 z-[60] flex items-center justify-center"
-          aria-modal="true"
-          role="dialog"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
+    <main className="min-h-[100svh] bg-neutral-900 text-neutral-50">
+      <Suspense fallback={null}>
+        <ScrollPreserver />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <ProjectModal />
+      </Suspense>
+
+      <Brand />
+      <HeaderGradient />
+      <FooterGradient />
+
+      <div className="w-full overflow-x-hidden px-6 sm:px-10 pt-[132px] md:pt-[152px] pb-16">
+        <section
+          id="bio"
+          className="scroll-mt-24 min-h-[calc(100svh-180px)] md:min-h-[calc(100svh-210px)]"
         >
-          <motion.div
-            className="absolute inset-0 bg-black/55 backdrop-blur-md"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            onMouseDown={close}
-          />
-
-          <motion.div
-            className={[
-              "relative mx-4",
-              "w-[min(92vw,900px)]",
-              "h-[min(84vh,720px)]",
-              "overflow-hidden rounded-3xl",
-              "border border-white/10 bg-neutral-950",
-              "shadow-[0_0_60px_rgba(0,0,0,0.55)]",
-            ].join(" ")}
-            initial={{ opacity: 0, y: 10, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.99 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            {/* x: no border, no background */}
-            <button
-              type="button"
-              onClick={close}
-              aria-label="close"
-              className={[
-                "absolute right-4 top-4 z-20",
-                "p-2",
-                "text-white/75 hover:text-white",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
-              ].join(" ")}
-            >
-              <span className="text-2xl leading-none">×</span>
-            </button>
-
-            {/* single scroll container: EVERYTHING scrolls */}
-            <div className="h-full overflow-y-auto">
-              {/* header image: flush edges, only bottom border */}
-              <div
-                className={[
-                  "w-full",
-                  "h-[206px] sm:h-[258px]",
-                  "overflow-hidden",
-                  "border-b border-white/10",
-                ].join(" ")}
-              >
-                {project.headerSlot ? (
-                  <div className="h-full w-full">{project.headerSlot}</div>
-                ) : (
-                  <ImageHold variant="header" label="header hold" />
-                )}
-              </div>
-
-              <div className="px-6 py-7">
-                {project.source && (
-                  <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/60">
-                    {project.source}
-                  </div>
-                )}
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                  {project.title}
-                </h2>
-                {project.subtitle && (
-                  <p className="mt-1 text-sm text-white/65">{project.subtitle}</p>
-                )}
-
-                <div className="mt-7 border-b border-white/10" />
-
-                <div className="mt-7 prose prose-invert max-w-none">
-                  {project.body}
-                </div>
-              </div>
+          <div className="pt-[30svh] md:pt-[28svh]">
+            <div className="space-y-3">
+              {BIO_TEXT.map((line, i) => (
+                <p
+                  key={i}
+                  className="w-full text-2xl md:text-4xl leading-[1.15] tracking-tight text-white"
+                >
+                  {line}
+                </p>
+              ))}
             </div>
-          </motion.div>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
+          </div>
+        </section>
+
+        <ParallaxDivider amount={-18} />
+
+        <section id="news" className="scroll-mt-24">
+          <div className="mb-4">
+            <SectionTitle>News</SectionTitle>
+          </div>
+          <StoryCarousel items={NEWS} />
+        </section>
+
+        <ParallaxDivider amount={22} />
+
+        <section id="projects" className="scroll-mt-24">
+          <div className="mb-4">
+            <SectionTitle>Projects</SectionTitle>
+          </div>
+          <StoryCarousel items={PROJECTS} />
+        </section>
+
+        <ParallaxDivider amount={-14} />
+
+        <section id="photos" className="scroll-mt-24">
+          <div className="mb-4">
+            <SectionTitle>Photos</SectionTitle>
+          </div>
+          <PhotoCarousel items={PHOTOS} />
+        </section>
+
+        <ParallaxDivider amount={18} />
+
+        <Footer />
+      </div>
+    </main>
   );
 }
