@@ -1,4 +1,4 @@
-// components/Main.tsx (drop-in replacement)
+// components/Main.tsx
 "use client";
 
 import { Suspense } from "react";
@@ -12,8 +12,6 @@ import PhotoCarousel, { type PhotoItem } from "./PhotoCarousel";
 import StoryCarousel, { type StoryItem } from "./StoryCarousel";
 import ProjectModal, { PROJECT_TEMPLATES } from "./ProjectModal";
 
-const R2_BASE = "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev";
-
 const BIO_TEXT = [
   "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of OpenAI's ChatGPT Lab.",
   "I've managed programs on for a Member of Congress, published work with OpenAI, built a congressional office, founded my own consultancy, and led AI workshops for educators.",
@@ -24,76 +22,28 @@ const NEWS: StoryItem[] = [
   {
     source: "ChatGPT for Education",
     title: "Authored Substack Post on Education for OpenAI",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/chatlab.jpg`,
+    image: "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/chatlab.jpg",
     href: "https://edunewsletter.openai.com/p/top-chats-from-the-fulbright-taiwan",
   },
   {
     source: "OpenAI",
     title: "Testimonial Featured in ChatGPT Pulse Launch",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/pulse.jpg`,
+    image: "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/pulse.jpg",
     href: "https://openai.com/index/introducing-chatgpt-pulse/",
   },
   {
     source: "OpenAI",
     title: "Study Mode Spotlight on ChatGPT's Instagram",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/study-mode.jpg`,
+    image: "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/study-mode.jpg",
     href: "https://www.instagram.com/chatgpt/reel/DNyG5VvXEZM/",
-  },
-  {
-    source: "Washington University in St. Louis",
-    title: "Won 2024 Truman Scholarship",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/truman.jpg`,
-    href: "https://source.washu.edu/2024/04/junior-seiler-awarded-truman-scholarship/",
-  },
-  {
-    source: "OpenAI",
-    title: "Co-Authored 100 Chats Project with the ChatGPT Lab",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/100chats.jpg`,
-    href: "https://chatgpt.com/100chats-project",
-  },
-  {
-    source: "Washington University in St. Louis",
-    title: "Named 2024 Rhodes Scholarship Finalist",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/rhodes.jpg`,
-    href: "https://source.washu.edu/2024/11/seniors-darden-seiler-were-rhodes-scholars-finalists/",
-  },
-  {
-    source: "Washington University in St. Louis",
-    title: "Won Fulbright Award to Taiwan",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/fulbright.jpg`,
-    href: "https://source.wustl.edu/2025/06/several-alumni-earn-fulbright-awards/",
-  },
-  {
-    source: "Student Life",
-    title: "Truman Scholarship Interview",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/trumanisaac.jpg`,
-    href: "https://www.studlife.com/news/2024/04/24/isaac-seiler-named-truman-scholar",
-  },
-  {
-    source: "Forbes",
-    title: "60 Truman Scholars Announced (2024)",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/harrytruman.jpg`,
-    href: "https://www.forbes.com/sites/michaeltnietzel/2024/04/13/the-truman-scholars-for-2024-are-announced/",
-  },
-  {
-    source: "Missouri College Media Awards",
-    title: "Missouri College Media Awards",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/washuspring.png`,
-    href: "https://source.washu.edu/2025/05/student-life-wins-best-newspaper-honor-at-missouri-college-media-awards/",
-  },
-  {
-    source: "Washington University in St. Louis",
-    title: "University Profile",
-    image: `https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/wustl.jpg`,
-    href: "https://artsci.washu.edu/ampersand/isaac-seiler-setting-his-sights-high",
   },
 ];
 
 const PROJECTS: StoryItem[] = PROJECT_TEMPLATES.map((p) => ({
   title: p.title,
   source: p.source ?? "Project",
-  image: p.image,
-  // keep users on-page; modal opens via query param
+  // vertical cover placeholder (one per project, no real images yet)
+  image: `/image/projects/${p.slug}-cover.jpg`,
   href: `/?project=${encodeURIComponent(p.slug)}#projects`,
   openInNewTab: false,
 }));
@@ -116,6 +66,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default function Main() {
   return (
     <main className="min-h-[100svh] bg-neutral-900 text-neutral-50">
+      {/* required for useSearchParams in ProjectModal */}
       <Suspense fallback={null}>
         <ProjectModal />
       </Suspense>
@@ -124,14 +75,12 @@ export default function Main() {
       <HeaderGradient />
       <FooterGradient />
 
-      {/* buffers align to logo edges */}
       <div className="w-full overflow-x-hidden px-6 sm:px-10 pt-[132px] md:pt-[152px] pb-16">
-        {/* BIO (static text) */}
+        {/* BIO */}
         <section
           id="bio"
           className="scroll-mt-24 min-h-[calc(100svh-180px)] md:min-h-[calc(100svh-210px)]"
         >
-          {/* starts roughly mid-frame */}
           <div className="pt-[30svh] md:pt-[28svh]">
             <div className="space-y-3">
               {BIO_TEXT.map((line, i) => (
