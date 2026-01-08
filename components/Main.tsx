@@ -1,7 +1,5 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
 import Brand from "./Brand";
 import HeaderGradient from "./HeaderGradient";
 import FooterGradient from "./FooterGradient";
@@ -12,7 +10,7 @@ import StoryCarousel, { type StoryItem } from "./StoryCarousel";
 
 const R2_BASE = "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev";
 
-const BIO_SENTENCES = [
+const BIO_TEXT = [
   "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of ChatGPT Lab at OpenAI.",
   "I've directed a communications program on Capitol Hill, published work through OpenAI, set up a congressional office, run my own consultancy, and conducted AI workshops for educators.",
   "I'm currently in the market for tech roles starting Summer 2026.",
@@ -94,26 +92,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export default function Main() {
-  const bioRef = useRef<HTMLElement | null>(null);
-
-  // scope scroll progress to the bio block
-  const { scrollYProgress } = useScroll({
-    target: bioRef,
-    offset: ["start end", "end start"],
-  });
-
-  // staggered dark → white reveals
-  const bioColor2 = useTransform(
-    scrollYProgress,
-    [0.28, 0.58],
-    ["#52525b", "#ffffff"]
-  );
-  const bioColor3 = useTransform(
-    scrollYProgress,
-    [0.42, 0.78],
-    ["#52525b", "#ffffff"]
-  );
-
   return (
     <main className="min-h-[100svh] bg-neutral-900 text-neutral-50">
       <Brand />
@@ -122,30 +100,22 @@ export default function Main() {
 
       {/* buffers align to logo edges */}
       <div className="w-full overflow-x-hidden px-6 sm:px-10 pt-[132px] md:pt-[152px] pb-16">
-        {/* BIO */}
+        {/* BIO (static text) */}
         <section
           id="bio"
-          ref={bioRef as any}
           className="scroll-mt-24 min-h-[calc(100svh-180px)] md:min-h-[calc(100svh-210px)]"
         >
-          {/* start roughly mid-frame */}
+          {/* starts roughly mid-frame */}
           <div className="pt-[30svh] md:pt-[28svh]">
             <div className="space-y-3">
-              <p className="w-full text-2xl md:text-4xl leading-[1.15] tracking-tight text-white">
-                {BIO_SENTENCES[0]}
-              </p>
-              <motion.p
-                style={{ color: bioColor2 }}
-                className="w-full text-2xl md:text-4xl leading-[1.15] tracking-tight"
-              >
-                {BIO_SENTENCES[1]}
-              </motion.p>
-              <motion.p
-                style={{ color: bioColor3 }}
-                className="w-full text-2xl md:text-4xl leading-[1.15] tracking-tight"
-              >
-                {BIO_SENTENCES[2]}
-              </motion.p>
+              {BIO_TEXT.map((line, i) => (
+                <p
+                  key={i}
+                  className="w-full text-2xl md:text-4xl leading-[1.15] tracking-tight text-white"
+                >
+                  {line}
+                </p>
+              ))}
             </div>
           </div>
         </section>
@@ -187,3 +157,4 @@ export default function Main() {
     </main>
   );
 }
+
