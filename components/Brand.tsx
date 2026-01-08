@@ -1,3 +1,4 @@
+// components/Brand.tsx
 "use client";
 
 import { motion } from "framer-motion";
@@ -11,7 +12,7 @@ export default function Brand() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, ease: [0.2, 1, 0.2, 1] }}
-            className="block font-sans font-semibold text-white tracking-[-0.04em] leading-none text-[clamp(64px,9vw,120px)]"
+            className="block font-sans font-semibold text-white tracking-[-0.04em] leading-none text-[clamp(64px,9.75vw,168px)]"
           >
             Isaac
           </motion.span>
@@ -26,7 +27,7 @@ export default function Brand() {
               ease: [0.2, 1, 0.2, 1],
               delay: 0.03,
             }}
-            className="block font-sans font-semibold text-white tracking-[-0.04em] leading-none text-[clamp(64px,9vw,120px)]"
+            className="block font-sans font-semibold text-white tracking-[-0.04em] leading-none text-[clamp(64px,9.75vw,168px)]"
           >
             Seiler
           </motion.span>
@@ -35,4 +36,3 @@ export default function Brand() {
     </div>
   );
 }
-
