@@ -1,6 +1,5 @@
 // app/page.tsx — DROP-IN REPLACEMENT
-"use client";
-
+import { Suspense } from "react";
 import Main from "@/components/Main";
 import {
   EMAIL,
@@ -46,7 +45,10 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Main />
+      <Suspense fallback={null}>
+        <Main />
+      </Suspense>
     </>
   );
 }
+
