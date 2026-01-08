@@ -1,26 +1,23 @@
-/* app/globals.css — DROP-IN REPLACEMENT */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  --bg: #4053d4;
+  color-scheme: light;
 }
 
 html,
 body {
   height: 100%;
-  overflow: hidden; /* no scroll */
 }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: #fff;
+  background: #ffffff;
+  color: #000000;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 650ms cubic-bezier(0.2, 1, 0.2, 1);
+  overflow-x: hidden; /* prevent sideways scroll */
 }
 
 a {
