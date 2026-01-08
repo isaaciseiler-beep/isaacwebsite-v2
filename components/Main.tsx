@@ -1,7 +1,7 @@
-// components/Main.tsx
+// components/Main.tsx (DROP-IN REPLACEMENT)
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 import Brand from "./Brand";
@@ -124,6 +124,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function ScrollPreserver() {
   const searchParams = useSearchParams();
   const isProjectOpen = Boolean(searchParams.get("project"));
+  const prevOpenRef = useRef(isProjectOpen);
 
   // capture scroll BEFORE any click navigates to ?project=
   useEffect(() => {
@@ -135,25 +136,56 @@ function ScrollPreserver() {
       const href = a.getAttribute("href") || "";
       if (!href.includes("?project=")) return;
 
-      sessionStorage.setItem("__bg_scroll_y__", String(window.scrollY || 0));
+      sessionStorage.setItem("__bg_scroll_y_open__", String(window.scrollY || 0));
     };
 
     document.addEventListener("click", onClickCapture, true);
     return () => document.removeEventListener("click", onClickCapture, true);
   }, []);
 
-  // restore scroll immediately AFTER the modal opens so background never moves
+  // restore after OPEN (prevents “jump to top” on open)
   useEffect(() => {
     if (!isProjectOpen) return;
 
-    const raw = sessionStorage.getItem("__bg_scroll_y__");
+    const raw = sessionStorage.getItem("__bg_scroll_y_open__");
     if (!raw) return;
 
     const y = Number(raw);
-    sessionStorage.removeItem("__bg_scroll_y__");
+    sessionStorage.removeItem("__bg_scroll_y_open__");
+
+    // double-raf reduces first-open jitter
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: Number.isFinite(y) ? y : 0,
+          left: 0,
+          behavior: "auto",
+        });
+      });
+    });
+  }, [isProjectOpen]);
+
+  // restore after CLOSE (prevents “return to top” on close)
+  useEffect(() => {
+    const prev = prevOpenRef.current;
+    prevOpenRef.current = isProjectOpen;
+
+    if (!prev || isProjectOpen) return;
+
+    const raw = sessionStorage.getItem("__bg_scroll_y_close__");
+    if (!raw) return;
+
+    const y = Number(raw);
+    sessionStorage.removeItem("__bg_scroll_y_close__");
 
     requestAnimationFrame(() => {
-      window.scrollTo({ top: Number.isFinite(y) ? y : 0, left: 0, behavior: "auto" });
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: Number.isFinite(y) ? y : 0,
+          left: 0,
+          behavior: "auto",
+        });
+      });
     });
   }, [isProjectOpen]);
 
@@ -163,12 +195,10 @@ function ScrollPreserver() {
 export default function Main() {
   return (
     <main className="min-h-[100svh] bg-neutral-900 text-neutral-50">
-      {/* keep background position fixed when opening project */}
       <Suspense fallback={null}>
         <ScrollPreserver />
       </Suspense>
 
-      {/* required for useSearchParams in ProjectModal */}
       <Suspense fallback={null}>
         <ProjectModal />
       </Suspense>
@@ -178,7 +208,6 @@ export default function Main() {
       <FooterGradient />
 
       <div className="w-full overflow-x-hidden px-6 sm:px-10 pt-[132px] md:pt-[152px] pb-16">
-        {/* BIO */}
         <section
           id="bio"
           className="scroll-mt-24 min-h-[calc(100svh-180px)] md:min-h-[calc(100svh-210px)]"
@@ -199,7 +228,6 @@ export default function Main() {
 
         <ParallaxDivider amount={-18} />
 
-        {/* NEWS */}
         <section id="news" className="scroll-mt-24">
           <div className="mb-4">
             <SectionTitle>News</SectionTitle>
@@ -209,7 +237,6 @@ export default function Main() {
 
         <ParallaxDivider amount={22} />
 
-        {/* PROJECTS */}
         <section id="projects" className="scroll-mt-24">
           <div className="mb-4">
             <SectionTitle>Projects</SectionTitle>
@@ -219,7 +246,6 @@ export default function Main() {
 
         <ParallaxDivider amount={-14} />
 
-        {/* PHOTOS */}
         <section id="photos" className="scroll-mt-24">
           <div className="mb-4">
             <SectionTitle>Photos</SectionTitle>
@@ -234,4 +260,3 @@ export default function Main() {
     </main>
   );
 }
-
