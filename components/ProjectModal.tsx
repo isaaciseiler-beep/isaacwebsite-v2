@@ -1,7 +1,6 @@
 // components/ProjectModal.tsx (drop-in replacement)
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -10,10 +9,44 @@ export type ProjectTemplate = {
   slug: string;
   title: string;
   subtitle?: string;
-  image?: string; // header image
   source?: string;
+
+  // placeholders (no real images yet)
+  coverSlot?: ReactNode; // vertical cover used in carousel card later
+  headerSlot?: ReactNode; // horizontal header shown inside modal
+
   body: ReactNode;
 };
+
+function ImageHold({
+  variant,
+  label,
+}: {
+  variant: "cover" | "header";
+  label: string;
+}) {
+  const cls =
+    variant === "cover"
+      ? "h-[160px] w-[118px] rounded-2xl"
+      : "h-44 sm:h-52 w-full rounded-2xl";
+
+  return (
+    <div
+      className={[
+        "relative overflow-hidden border border-white/10 bg-white/5",
+        "shadow-[0_0_18px_rgba(0,0,0,0.25)]",
+        cls,
+      ].join(" ")}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5" />
+      <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
+        <div className="text-xs uppercase tracking-[0.22em] text-white/55">
+          {label}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const PROJECT_TEMPLATES: ProjectTemplate[] = [
   {
@@ -21,7 +54,8 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     title: "Ops Automation Stack",
     subtitle: "How I build small systems that remove repetitive work.",
     source: "Project",
-    image: "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/pulse.jpg",
+    coverSlot: <ImageHold variant="cover" label="cover hold" />,
+    headerSlot: <ImageHold variant="header" label="header hold" />,
     body: (
       <div className="space-y-6">
         <p>
@@ -46,14 +80,11 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     title: "ChatGPT Local Lab",
     subtitle: "Workshops + experiments with educators in Taiwan.",
     source: "Project",
-    image:
-      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/study-mode.jpg",
+    coverSlot: <ImageHold variant="cover" label="cover hold" />,
+    headerSlot: <ImageHold variant="header" label="header hold" />,
     body: (
       <div className="space-y-6">
-        <p>
-          Practical sessions focused on classroom workflows: planning,
-          differentiation, feedback, and admin tasks.
-        </p>
+        <p>Practical sessions focused on planning, feedback, and admin tasks.</p>
       </div>
     ),
   },
@@ -62,13 +93,13 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     title: "Job Signal",
     subtitle: "Tracking roles, follow-ups, and outreach with one source of truth.",
     source: "Project",
-    image:
-      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/100chats.jpg",
+    coverSlot: <ImageHold variant="cover" label="cover hold" />,
+    headerSlot: <ImageHold variant="header" label="header hold" />,
     body: (
       <div className="space-y-6">
         <p>
           A personal system for managing applications and networking without
-          losing context. Designed to be fast to update and easy to audit.
+          losing context.
         </p>
       </div>
     ),
@@ -78,14 +109,11 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     title: "Portfolio Photo Map",
     subtitle: "A map-first way to browse travel + photography.",
     source: "Project",
-    image:
-      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/wustl.jpg",
+    coverSlot: <ImageHold variant="cover" label="cover hold" />,
+    headerSlot: <ImageHold variant="header" label="header hold" />,
     body: (
       <div className="space-y-6">
-        <p>
-          A UI pattern for browsing large photo libraries by place, then
-          narrowing by theme.
-        </p>
+        <p>A UI pattern for browsing large photo libraries by place.</p>
       </div>
     ),
   },
@@ -94,8 +122,8 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     title: "This Site",
     subtitle: "A one-page portfolio with a ‘window’ modal for project write-ups.",
     source: "Project",
-    image:
-      "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/truman.jpg",
+    coverSlot: <ImageHold variant="cover" label="cover hold" />,
+    headerSlot: <ImageHold variant="header" label="header hold" />,
     body: (
       <div className="space-y-6">
         <p>
@@ -159,52 +187,62 @@ export default function ProjectModal() {
         onMouseDown={close}
       />
 
-      {/* bigger frame */}
-      <div className="relative mx-4 w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-neutral-950/90 shadow-[0_0_70px_rgba(0,0,0,0.6)]">
-        {/* header image inside */}
-        {project.image && (
-          <div className="relative h-52 sm:h-64 w-full">
-            <Image
-              src={project.image}
-              alt={project.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 768px"
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/75 via-neutral-950/25 to-transparent" />
-          </div>
-        )}
+      {/* fixed-size pane (same every time) */}
+      <div
+        className={[
+          "relative mx-4",
+          "w-[min(92vw,900px)]",
+          "h-[min(84vh,720px)]",
+          "overflow-hidden rounded-3xl",
+          "border border-white/10 bg-neutral-950/90",
+          "shadow-[0_0_60px_rgba(0,0,0,0.55)]",
+          "flex flex-col", // critical for fixed header + scroll body
+        ].join(" ")}
+      >
+        {/* header area (fixed height, non-scrolling) */}
+        <div className="px-6 pt-6">
+          {project.headerSlot ? (
+            <div className="mb-5">{project.headerSlot}</div>
+          ) : (
+            <div className="mb-5">
+              <ImageHold variant="header" label="header hold" />
+            </div>
+          )}
 
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 px-7 py-6">
-          <div className="min-w-0">
-            {project.source && (
-              <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/60">
-                {project.source}
-              </div>
-            )}
-            <h2 className="mt-2 truncate text-2xl sm:text-3xl font-semibold tracking-tight">
-              {project.title}
-            </h2>
-            {project.subtitle && (
-              <p className="mt-1 text-sm text-white/65">{project.subtitle}</p>
-            )}
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              {project.source && (
+                <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/60">
+                  {project.source}
+                </div>
+              )}
+              <h2 className="mt-2 truncate text-2xl font-semibold tracking-tight">
+                {project.title}
+              </h2>
+              {project.subtitle && (
+                <p className="mt-1 text-sm text-white/65">{project.subtitle}</p>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={close}
+              className="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+              aria-label="close"
+            >
+              ×
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={close}
-            className="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 hover:bg-white/10"
-            aria-label="close"
-          >
-            ×
-          </button>
+
+          <div className="mt-5 border-b border-white/10" />
         </div>
 
-        {/* scrollable content area (panel stays fixed) */}
-        <div className="max-h-[70vh] overflow-y-auto px-7 py-7">
+        {/* scrollable content (MUST have min-h-0 inside flex) */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           <div className="prose prose-invert max-w-none">{project.body}</div>
         </div>
       </div>
     </div>
   );
 }
+
