@@ -1,7 +1,7 @@
 // components/ProjectModal.tsx (DROP-IN REPLACEMENT)
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,10 +11,8 @@ export type ProjectTemplate = {
   title: string;
   subtitle?: string;
   source?: string;
-
   coverSlot?: ReactNode;
   headerSlot?: ReactNode;
-
   body: ReactNode;
 };
 
@@ -55,17 +53,11 @@ const FAKE_ESSAY = (
       This is a deliberately long placeholder essay to verify that the entire
       modal content scrolls as one unit (image, title block, and body).
     </p>
-    <h3 className="text-lg font-semibold">1. what i mean by “small systems”</h3>
-    <p>
-      A “small system” is anything that reduces repeated decision-making. It can
-      be as simple as a template that forces consistent inputs, or as elaborate
-      as a pipeline that moves information across tools.
-    </p>
+    <h3 className="text-lg font-semibold">scroll test</h3>
     <div className="space-y-6">
-      {Array.from({ length: 22 }).map((_, i) => (
+      {Array.from({ length: 30 }).map((_, i) => (
         <p key={i}>
-          Extra paragraph {i + 1}. This is additional filler to ensure the scroll
-          area is undeniably long.
+          Extra paragraph {i + 1}. This is filler content to force scrolling.
         </p>
       ))}
     </div>
@@ -167,16 +159,13 @@ export default function ProjectModal() {
   const isOpen = Boolean(project);
   useBodyScrollLock(isOpen);
 
-  const scrollYRef = useRef(0);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    scrollYRef.current = window.scrollY || 0;
-  }, [isOpen]);
-
   const close = () => {
-    // hand off the desired restore position to Main (works even if route update delays)
-    sessionStorage.setItem("__bg_scroll_y_close__", String(scrollYRef.current || 0));
+    // restore to where the user was when they opened the modal
+    const raw = sessionStorage.getItem("__project_bg_y__");
+    sessionStorage.setItem(
+      "__project_restore_y__",
+      raw ?? String(window.scrollY || 0)
+    );
 
     const next = new URLSearchParams(searchParams.toString());
     next.delete("project");
@@ -289,4 +278,3 @@ export default function ProjectModal() {
     </AnimatePresence>
   );
 }
-
