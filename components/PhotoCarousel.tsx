@@ -1,6 +1,7 @@
 // components/PhotoCarousel.tsx
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
@@ -14,8 +15,8 @@ export type PhotoItem = {
 const CARD_WIDTH = 256;
 const CARD_GAP = 16;
 
-// make the photos section shorter (removes the big empty vertical gap)
-const SECTION_HEIGHT_PX = 260;
+// taller frame (locks ratio to achieve “taller photos”)
+const FRAME_ASPECT = "aspect-[4/5]"; // tall; change to aspect-[3/4] if you want slightly less tall
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
   const d =
@@ -25,9 +26,9 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
 
   return (
     <svg
-    aria-hidden
-    viewBox="0 0 24 24"
-    className="h-6 w-6 filter drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]"
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="h-6 w-6 filter drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]"
     >
       <path
         d={d}
@@ -54,6 +55,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
 
+  // randomize once per page load (client-side)
   const shuffledItems = useMemo(() => shuffle(items), [items]);
 
   useEffect(() => {
@@ -80,11 +82,12 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
   }
 
   return (
-    <div className="relative" style={{ height: SECTION_HEIGHT_PX }}>
-      <div className="relative h-full -mx-6 sm:-mx-10">
-        <div className="h-full overflow-hidden px-6 sm:px-10">
+    <div className="relative">
+      {/* bleed into BOTH left + right buffers */}
+      <div className="relative -mx-6 sm:-mx-10">
+        <div className="overflow-hidden px-6 sm:px-10">
           <motion.div
-            className="flex h-full items-end gap-4"
+            className="flex gap-4"
             animate={{ x: -index * (CARD_WIDTH + CARD_GAP) }}
             transition={transition}
             drag="x"
@@ -99,29 +102,24 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
               const key = item.image ?? `${item.location}-${i}`;
 
               const Card = (
-                <article className="w-[256px] flex-shrink-0 bg-transparent">
-                  {/* frame fills the section height */}
-                  <div className="relative h-full w-full" style={{ height: "100%" }}>
+                <article className="w-[256px] flex-shrink-0">
+                  <div
+                    className={`relative w-full overflow-hidden rounded-2xl bg-transparent ${FRAME_ASPECT}`}
+                  >
                     {item.image ? (
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.location}
-                        loading={i < 2 ? "eager" : "lazy"}
-                        decoding="async"
-                        style={{
-                          height: "100%",
-                          width: "auto",
-                          maxWidth: "100%",
-                          display: "block",
-                          marginInline: "auto",
-                          objectFit: "contain",
-                        }}
+                        fill
+                        className="object-cover"
+                        sizes="256px"
+                        priority={i < 2}
                       />
                     ) : (
                       <div className="h-full w-full bg-neutral-200" />
                     )}
 
-                    {/* location pill INSIDE bottom-right, no border, darker + more translucent */}
+                    {/* pill INSIDE bottom-right, no border */}
                     <div className="absolute bottom-3 right-3 z-20">
                       <div className="rounded-full bg-black/65 px-3 py-1 text-[11px] font-medium text-white/85 backdrop-blur-sm">
                         {item.location}
@@ -131,7 +129,15 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
                 </article>
               );
 
-              return item.href ? (
+              if (!item.href) {
+                return (
+                  <div key={key} className="block flex-shrink-0">
+                    {Card}
+                  </div>
+                );
+              }
+
+              return (
                 <Link
                   key={key}
                   href={item.href}
@@ -141,21 +147,18 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
                 >
                   {Card}
                 </Link>
-              ) : (
-                <div key={key} className="block flex-shrink-0">
-                  {Card}
-                </div>
               );
             })}
           </motion.div>
         </div>
 
+        {/* arrows on bezels (close to edge, not touching) */}
         {canPrev && (
           <button
             type="button"
             aria-label="previous"
             onClick={goPrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:left-4"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="left" />
           </button>
@@ -166,7 +169,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="next"
             onClick={goNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:right-4"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="right" />
           </button>
