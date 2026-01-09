@@ -46,25 +46,40 @@ export default function Footer() {
 
   return (
     <footer className="relative z-50 pt-10">
-      <div className="border-t border-white/10 pt-8">
+      {/* removed top border */}
+      <div className="pt-2">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-neutral-50/60">© {year} Isaac Seiler</div>
 
-          <div className="flex flex-wrap gap-2">
-            <FooterButton href="/resume.pdf" download>
-              Resume
-            </FooterButton>
-            <FooterButton href="https://www.linkedin.com/in/isaacseiler/">
-              LinkedIn
-            </FooterButton>
-            <FooterButton href="mailto:isaacseiler@gmail.com">Contact</FooterButton>
+          {/* left buttons + right git pill */}
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+            <div className="flex flex-wrap gap-2 sm:flex-1 sm:justify-start">
+              <FooterButton href="/resume.pdf" download>
+                Resume
+              </FooterButton>
+              <FooterButton href="https://www.linkedin.com/in/isaacseiler/">
+                LinkedIn
+              </FooterButton>
+              <FooterButton href="mailto:isaacseiler@gmail.com">
+                Contact
+              </FooterButton>
+            </div>
+
+            <div className="flex sm:justify-end">
+              <GitWidget repoUrl={repoUrl} />
+            </div>
           </div>
         </div>
-
-        <div className="mt-6 flex items-center justify-center sm:justify-end">
-          <GitWidget repoUrl={repoUrl} />
-        </div>
       </div>
+
+      {/* bottom image: full-bleed, no buffer */}
+      <img
+        src="https://pub-176caad97cac44369ba9cef0291eb27d.r2.dev/ISAAC%20SEILER.png"
+        alt="Isaac Seiler"
+        className="mt-6 block w-full select-none"
+        draggable={false}
+        loading="lazy"
+      />
     </footer>
   );
 }
