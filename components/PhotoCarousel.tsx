@@ -90,42 +90,52 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
   return (
     <div className="relative">
-      <div className="relative">
+      {/* bleed into bezels, but keep content aligned via inner padding */}
+      <div className="relative -mx-6 sm:-mx-10">
         <div
           ref={scrollerRef}
           className="
             photoScroller
             flex gap-4
             overflow-x-auto overflow-y-hidden
+            px-6 sm:px-10
             snap-x snap-mandatory
             overscroll-x-contain
             scroll-smooth
             [-ms-overflow-style:none] [scrollbar-width:none]
-            [touch-action:pan-x]
           "
         >
           <style jsx>{`
             .photoScroller::-webkit-scrollbar {
               display: none;
             }
-
-            /* align with header buffer (no bleed / no extra padding by default) */
             .photoScroller {
-              padding-left: 0px;
-              padding-right: 0px;
-              scroll-padding-left: 0px;
-              scroll-padding-right: 0px;
               -webkit-overflow-scrolling: touch;
+              /* allow both directions so vertical page scroll works over the carousel */
+              touch-action: pan-x pan-y;
             }
 
-            /* mobile: one card centered with peeks on both sides */
+            /* mobile: one card centered with peeks (uses full carousel real estate) */
             @media (max-width: 639px) {
               .photoScroller {
                 --cardw: 82vw;
-                padding-left: calc((100% - var(--cardw)) / 2);
-                padding-right: calc((100% - var(--cardw)) / 2);
-                scroll-padding-left: calc((100% - var(--cardw)) / 2);
-                scroll-padding-right: calc((100% - var(--cardw)) / 2);
+                /* clamp keeps the “start” feeling consistent while still centering the card */
+                padding-left: clamp(16px, calc((100% - var(--cardw)) / 2), 40px);
+                padding-right: clamp(
+                  16px,
+                  calc((100% - var(--cardw)) / 2),
+                  40px
+                );
+                scroll-padding-left: clamp(
+                  16px,
+                  calc((100% - var(--cardw)) / 2),
+                  40px
+                );
+                scroll-padding-right: clamp(
+                  16px,
+                  calc((100% - var(--cardw)) / 2),
+                  40px
+                );
               }
             }
           `}</style>
@@ -190,6 +200,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
           })}
         </div>
 
+        {/* arrows hidden on mobile */}
         {canPrev && (
           <button
             type="button"
