@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type PhotoItem = {
   image?: string;
@@ -14,13 +14,17 @@ export type PhotoItem = {
 
 /**
  * photos section only:
- * +50% height, -20% width
+ * - increase section height by ~50% (via PHOTO_HEIGHT_PX)
+ * - do NOT force an aspect ratio: constrain height only, preserve each image's native ratio
+ * - randomize order on each page load (client-side)
  */
-const CARD_WIDTH = 256; // was ~320
+const CARD_WIDTH = 256;
 const CARD_GAP = 16;
 
+// ~50% taller than a typical ~180px image frame
+const PHOTO_HEIGHT_PX = 270;
+
 function Chevron({ direction }: { direction: "left" | "right" }) {
-  // narrow, elongated chevron (no stem)
   const d =
     direction === "left"
       ? "M15 6L8.5 12 15 18"
@@ -44,11 +48,27 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
   );
 }
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
 
-  const maxIndex = Math.max(0, items.length - 1);
+  // shuffle once per page load (client-side mount)
+  const shuffledItems = useMemo(() => shuffle(items), [items]);
+
+  useEffect(() => {
+    setIndex(0);
+  }, [shuffledItems.length]);
+
+  const maxIndex = Math.max(0, shuffledItems.length - 1);
   const canPrev = index > 0;
   const canNext = index < maxIndex;
 
@@ -63,7 +83,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
   const goPrev = () => setIndex((v) => Math.max(0, v - 1));
   const goNext = () => setIndex((v) => Math.min(maxIndex, v + 1));
 
-  if (items.length === 0) {
+  if (shuffledItems.length === 0) {
     return <div className="text-sm text-neutral-50/60">No photos yet.</div>;
   }
 
@@ -84,17 +104,22 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
               else if (info.offset.x > 60 && canPrev) goPrev();
             }}
           >
-            {items.map((item, i) => {
+            {shuffledItems.map((item, i) => {
+              const key = item.image ?? `${item.location}-${i}`;
+
               const Card = (
                 <article className="w-[256px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.14)]">
-                  {/* taller photos: 16/9 -> 16/13.5 (+50% height) */}
-                  <div className="relative w-full aspect-[16/13.5]">
+                  {/* fixed height only; preserve native ratio; no crop */}
+                  <div
+                    className="relative w-full bg-neutral-100"
+                    style={{ height: PHOTO_HEIGHT_PX }}
+                  >
                     {item.image ? (
                       <Image
                         src={item.image}
                         alt={item.location}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         sizes="256px"
                         priority={i < 2}
                       />
@@ -113,10 +138,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
               if (!item.href) {
                 return (
-                  <div
-                    key={`${item.location}-${i}`}
-                    className="block flex-shrink-0"
-                  >
+                  <div key={key} className="block flex-shrink-0">
                     {Card}
                   </div>
                 );
@@ -124,7 +146,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
               return (
                 <Link
-                  key={`${item.href}-${i}`}
+                  key={key}
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -143,7 +165,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="previous"
             onClick={goPrev}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:left-4"
           >
             <Chevron direction="left" />
           </button>
@@ -154,7 +176,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="next"
             onClick={goNext}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:right-4"
           >
             <Chevron direction="right" />
           </button>
