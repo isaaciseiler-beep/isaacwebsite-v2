@@ -2,7 +2,12 @@
 import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+  PREVIEW_IMAGE_URL,
+} from "@/lib/site";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -50,6 +55,14 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: PREVIEW_IMAGE_URL,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — site preview`,
+      },
+    ],
   },
 
   icons: {
