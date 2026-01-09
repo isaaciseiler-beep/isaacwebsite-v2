@@ -10,7 +10,6 @@ export type StoryItem = {
   source?: string;
   image?: string;
   href?: string;
-  /** if false, do not open in new tab; default: true when href is external */
   openInNewTab?: boolean;
 };
 
@@ -49,10 +48,8 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
   const updateNav = React.useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
-
     const maxScrollLeft = el.scrollWidth - el.clientWidth;
     const sl = el.scrollLeft;
-
     setCanPrev(sl > 2);
     setCanNext(sl < maxScrollLeft - 2);
   }, []);
@@ -95,8 +92,8 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
             px-6 sm:px-10
             scroll-smooth
             snap-x snap-mandatory
-            touch-pan-x
             overscroll-x-contain
+            [touch-action:pan-y]
             [-ms-overflow-style:none] [scrollbar-width:none]
           "
           style={{ scrollPaddingLeft: 24, scrollPaddingRight: 24 }}
