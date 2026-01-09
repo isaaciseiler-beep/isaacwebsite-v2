@@ -90,7 +90,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
   return (
     <div className="relative">
-      {/* bleed into bezels, but keep content aligned via inner padding */}
+      {/* bleed into bezels, but content starts at the same buffer as headers */}
       <div className="relative -mx-6 sm:-mx-10">
         <div
           ref={scrollerRef}
@@ -111,31 +111,14 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             }
             .photoScroller {
               -webkit-overflow-scrolling: touch;
-              /* allow both directions so vertical page scroll works over the carousel */
               touch-action: pan-x pan-y;
+              scroll-padding-left: 24px;
+              scroll-padding-right: 24px;
             }
-
-            /* mobile: one card centered with peeks (uses full carousel real estate) */
-            @media (max-width: 639px) {
+            @media (min-width: 640px) {
               .photoScroller {
-                --cardw: 82vw;
-                /* clamp keeps the “start” feeling consistent while still centering the card */
-                padding-left: clamp(16px, calc((100% - var(--cardw)) / 2), 40px);
-                padding-right: clamp(
-                  16px,
-                  calc((100% - var(--cardw)) / 2),
-                  40px
-                );
-                scroll-padding-left: clamp(
-                  16px,
-                  calc((100% - var(--cardw)) / 2),
-                  40px
-                );
-                scroll-padding-right: clamp(
-                  16px,
-                  calc((100% - var(--cardw)) / 2),
-                  40px
-                );
+                scroll-padding-left: 40px;
+                scroll-padding-right: 40px;
               }
             }
           `}</style>
@@ -147,12 +130,11 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
               <article
                 data-photo-card
                 className="
-                  relative flex-shrink-0
-                  snap-center sm:snap-start
+                  relative flex-shrink-0 snap-start
                   overflow-hidden rounded-2xl
                   bg-white/5
                   shadow-[0_0_20px_rgba(0,0,0,0.14)]
-                  w-[82vw] sm:w-max
+                  w-[86vw] sm:w-max
                   max-w-[560px]
                 "
                 style={{ height: CARD_H }}
