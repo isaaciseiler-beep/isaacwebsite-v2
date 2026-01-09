@@ -69,17 +69,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-
-      {/* full-bleed footer image: no side/bottom buffer */}
-      <div className="relative mt-6 -mx-6 sm:-mx-10">
-        <img
-          src="https://pub-176caad97cac44369ba9cef0291eb27d.r2.dev/ISAAC%20SEILER.png"
-          alt="Isaac Seiler"
-          className="block w-full select-none"
-          draggable={false}
-          loading="lazy"
-        />
-      </div>
     </footer>
   );
 }
+
