@@ -5,10 +5,13 @@ export const SITE_NAME = PERSON_NAME;
 
 // keep this short (150–160 chars target)
 export const SITE_DESCRIPTION =
-  "Isaac Seiler’s site: bio, news, projects, and photos.";
+  "Isaac Seiler is a recent graduate of Washington University in St. Louis, Fulbright Scholar, and Truman Scholar.";
 
 export const EMAIL = "isaacseiler@gmail.com";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/isaacseiler/";
+
+export const PREVIEW_IMAGE_URL =
+  "https://pub-176caad97cac44369ba9cef0291eb27d.r2.dev/previewsite.png";
 
 function normalizeUrl(input: string): string {
   const trimmed = input.trim();
@@ -42,3 +45,4 @@ export function absoluteUrl(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
   return `${SITE_URL}${p}`;
 }
+
