@@ -83,7 +83,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
 
   return (
     <div className="relative">
-      {/* bleed into bezels, but keep content aligned via inner padding */}
+      {/* bleed into bezels, but content starts at the same buffer as headers */}
       <div className="relative -mx-6 sm:-mx-10">
         <div
           ref={scrollerRef}
@@ -104,8 +104,15 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
             }
             .storyScroller {
               -webkit-overflow-scrolling: touch;
-              /* key fix: don’t lock vertical scrolling */
               touch-action: pan-x pan-y;
+              scroll-padding-left: 24px;
+              scroll-padding-right: 24px;
+            }
+            @media (min-width: 640px) {
+              .storyScroller {
+                scroll-padding-left: 40px;
+                scroll-padding-right: 40px;
+              }
             }
           `}</style>
 
