@@ -1,10 +1,9 @@
-// components/StoryCarousel.tsx (drop-in replacement)
+// components/StoryCarousel.tsx
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
-import { useMemo, useState } from "react";
+import * as React from "react";
 
 export type StoryItem = {
   title: string;
@@ -15,7 +14,7 @@ export type StoryItem = {
   openInNewTab?: boolean;
 };
 
-const CARD_WIDTH = 253;
+const CARD_W = 253;
 const CARD_GAP = 16;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
@@ -43,23 +42,43 @@ function isExternal(href: string) {
 }
 
 export default function StoryCarousel({ items }: { items: StoryItem[] }) {
-  const reduce = useReducedMotion();
-  const [index, setIndex] = useState(0);
+  const scrollerRef = React.useRef<HTMLDivElement | null>(null);
+  const [canPrev, setCanPrev] = React.useState(false);
+  const [canNext, setCanNext] = React.useState(false);
 
-  const maxIndex = Math.max(0, items.length - 1);
-  const canPrev = index > 0;
-  const canNext = index < maxIndex;
+  const updateNav = React.useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
 
-  const transition = useMemo(
-    () =>
-      reduce
-        ? { duration: 0 }
-        : { duration: 0.45, ease: [0.4, 0, 0.2, 1] as any },
-    [reduce]
-  );
+    const maxScrollLeft = el.scrollWidth - el.clientWidth;
+    const sl = el.scrollLeft;
 
-  const goPrev = () => setIndex((v) => Math.max(0, v - 1));
-  const goNext = () => setIndex((v) => Math.min(maxIndex, v + 1));
+    setCanPrev(sl > 2);
+    setCanNext(sl < maxScrollLeft - 2);
+  }, []);
+
+  React.useEffect(() => {
+    updateNav();
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const onScroll = () => updateNav();
+    el.addEventListener("scroll", onScroll, { passive: true });
+
+    const ro = new ResizeObserver(() => updateNav());
+    ro.observe(el);
+
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+    };
+  }, [updateNav, items.length]);
+
+  const scrollByCard = (dir: -1 | 1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (CARD_W + CARD_GAP), behavior: "smooth" });
+  };
 
   if (items.length === 0) {
     return <div className="text-sm text-neutral-50/60">No items yet.</div>;
@@ -68,84 +87,84 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
   return (
     <div className="relative">
       <div className="relative -mx-6 sm:-mx-10">
-        <div className="overflow-hidden px-6 sm:px-10">
-          <motion.div
-            className="flex gap-4"
-            animate={{ x: -index * (CARD_WIDTH + CARD_GAP) }}
-            transition={transition}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
-            onDragEnd={(_, info) => {
-              if (info.offset.x < -60 && canNext) goNext();
-              else if (info.offset.x > 60 && canPrev) goPrev();
-            }}
-          >
-            {items.map((item, i) => {
-              const Card = (
-                <article className="h-[368px] w-[253px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.18)] md:h-[414px]">
-                  <div className="relative h-full w-full">
-                    {item.image ? (
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                        sizes="253px"
-                        priority={i < 2}
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-neutral-200" />
+        <div
+          ref={scrollerRef}
+          className="
+            flex gap-4
+            overflow-x-auto overflow-y-hidden
+            px-6 sm:px-10
+            scroll-smooth
+            snap-x snap-mandatory
+            touch-pan-x
+            overscroll-x-contain
+            [-ms-overflow-style:none] [scrollbar-width:none]
+          "
+          style={{ scrollPaddingLeft: 24, scrollPaddingRight: 24 }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+
+          {items.map((item, i) => {
+            const Card = (
+              <article className="h-[368px] w-[253px] overflow-hidden rounded-2xl bg-white shadow-[0_0_20px_rgba(0,0,0,0.18)] md:h-[414px] snap-start flex-shrink-0">
+                <div className="relative h-full w-full">
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      sizes="253px"
+                      quality={90}
+                      priority={i < 2}
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-neutral-200" />
+                  )}
+
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                  <div className="absolute inset-x-0 bottom-0 p-4">
+                    {item.source && (
+                      <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/75">
+                        {item.source}
+                      </div>
                     )}
-
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                    <div className="absolute inset-x-0 bottom-0 p-4">
-                      {item.source && (
-                        <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/75">
-                          {item.source}
-                        </div>
-                      )}
-                      <h3 className="mt-2 text-sm font-semibold leading-snug text-white md:text-base">
-                        {item.title}
-                      </h3>
-                    </div>
+                    <h3 className="mt-2 text-sm font-semibold leading-snug text-white md:text-base">
+                      {item.title}
+                    </h3>
                   </div>
-                </article>
-              );
+                </div>
+              </article>
+            );
 
-              if (!item.href) {
-                return (
-                  <div key={`${item.title}-${i}`} className="flex-shrink-0">
-                    {Card}
-                  </div>
-                );
-              }
+            if (!item.href) return <div key={`${item.title}-${i}`}>{Card}</div>;
 
-              const external = isExternal(item.href);
-              const openInNewTab =
-                item.openInNewTab ?? (external ? true : false);
+            const external = isExternal(item.href);
+            const openInNewTab = item.openInNewTab ?? (external ? true : false);
 
-              return (
-                <Link
-                  key={`${item.href}-${i}`}
-                  href={item.href}
-                  target={openInNewTab ? "_blank" : undefined}
-                  rel={openInNewTab ? "noopener noreferrer" : undefined}
-                  className="flex-shrink-0 focus-visible:outline-none"
-                >
-                  {Card}
-                </Link>
-              );
-            })}
-          </motion.div>
+            return (
+              <Link
+                key={`${item.href}-${i}`}
+                href={item.href}
+                target={openInNewTab ? "_blank" : undefined}
+                rel={openInNewTab ? "noopener noreferrer" : undefined}
+                className="focus-visible:outline-none"
+              >
+                {Card}
+              </Link>
+            );
+          })}
         </div>
 
         {canPrev && (
           <button
             type="button"
             aria-label="previous"
-            onClick={goPrev}
+            onClick={() => scrollByCard(-1)}
             className="absolute left-0 top-1/2 -translate-y-1/2 translate-x-3 sm:translate-x-5 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="left" />
@@ -156,7 +175,7 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
           <button
             type="button"
             aria-label="next"
-            onClick={goNext}
+            onClick={() => scrollByCard(1)}
             className="absolute right-0 top-1/2 -translate-y-1/2 -translate-x-3 sm:-translate-x-5 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="right" />
@@ -166,4 +185,3 @@ export default function StoryCarousel({ items }: { items: StoryItem[] }) {
     </div>
   );
 }
-
