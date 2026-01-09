@@ -11,11 +11,11 @@ export type PhotoItem = {
   href?: string;
 };
 
-const CARD_WIDTH = 256; // used only for scroll math; wrapper still uses this width
+const CARD_WIDTH = 256;
 const CARD_GAP = 16;
 
-// consistent visible height for every photo
-const PHOTO_HEIGHT_PX = 420;
+// was 420; +50% taller
+const PHOTO_HEIGHT_PX = 630;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
   const d =
@@ -99,12 +99,15 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
               const key = item.image ?? `${item.location}-${i}`;
 
               const Card = (
-                // fixed frame height; width stays at 256 for now (scroll math)
                 <article
                   className="w-[256px] bg-transparent"
                   style={{ height: PHOTO_HEIGHT_PX }}
                 >
-                  <div className="relative h-full w-full overflow-hidden">
+                  {/* photo frame */}
+                  <div
+                    className="relative w-full overflow-hidden"
+                    style={{ height: PHOTO_HEIGHT_PX }}
+                  >
                     {item.image ? (
                       <img
                         src={item.image}
@@ -124,8 +127,9 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
                       <div className="h-full w-full bg-neutral-200" />
                     )}
 
+                    {/* inside bottom-right of photo frame */}
                     <div className="absolute bottom-3 right-3">
-                      <div className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-black backdrop-blur-sm">
+                      <div className="rounded-full bg-black/75 px-3 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm">
                         {item.location}
                       </div>
                     </div>
@@ -181,4 +185,3 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
     </div>
   );
 }
-
