@@ -15,8 +15,8 @@ export type PhotoItem = {
 const CARD_WIDTH = 256;
 const CARD_GAP = 16;
 
-// taller frame (locks ratio to achieve “taller photos”)
-const FRAME_ASPECT = "aspect-[4/5]"; // tall; change to aspect-[3/4] if you want slightly less tall
+// tall frame so photos read "taller"
+const FRAME_ASPECT = "aspect-[4/5]";
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
   const d =
@@ -55,7 +55,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
 
-  // randomize once per page load (client-side)
+  // randomize once per page load (client-side render)
   const shuffledItems = useMemo(() => shuffle(items), [items]);
 
   useEffect(() => {
@@ -104,14 +104,15 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
               const Card = (
                 <article className="w-[256px] flex-shrink-0">
                   <div
-                    className={`relative w-full overflow-hidden rounded-2xl bg-transparent ${FRAME_ASPECT}`}
+                    className={`relative w-full overflow-hidden rounded-2xl ${FRAME_ASPECT}`}
                   >
                     {item.image ? (
                       <Image
                         src={item.image}
                         alt={item.location}
                         fill
-                        className="object-cover"
+                        // horizontal crop (trim sides) + centered framing
+                        className="object-cover object-center"
                         sizes="256px"
                         priority={i < 2}
                       />
@@ -119,7 +120,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
                       <div className="h-full w-full bg-neutral-200" />
                     )}
 
-                    {/* pill INSIDE bottom-right, no border */}
+                    {/* pill INSIDE bottom-right, darker + more translucent, no border */}
                     <div className="absolute bottom-3 right-3 z-20">
                       <div className="rounded-full bg-black/65 px-3 py-1 text-[11px] font-medium text-white/85 backdrop-blur-sm">
                         {item.location}
