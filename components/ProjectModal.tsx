@@ -119,7 +119,6 @@ function LinkOut({
 }
 
 function SectionTitle({ children }: { children: ReactNode }) {
-  // "same style as title text" (body section level)
   return (
     <h3 className="mt-6 mb-2 text-xl font-semibold tracking-tight text-white">
       {children}
@@ -128,7 +127,6 @@ function SectionTitle({ children }: { children: ReactNode }) {
 }
 
 function LinksList({ children }: { children: ReactNode }) {
-  // 1.5-ish spacing between links
   return <div className="mt-2 space-y-3 leading-relaxed">{children}</div>;
 }
 
@@ -172,7 +170,9 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
       <div className="space-y-4">
         <p>
           This work, published with the{" "}
-          <LinkOut href="https://www.csg.org/">Council of State Governments</LinkOut>
+          <LinkOut href="https://www.csg.org/">
+            Council of State Governments
+          </LinkOut>
           , translates the GenAI hype cycle into a measurable picture of how
           state and territory governments are actually responding. I built a
           public-information benchmark that scores all states and territories on
@@ -389,9 +389,9 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
         <LinksList>
           <div>
             <LinkOut href="https://drive.google.com/file/d/1Z6-RR1Zw7z2RieJwVHdk0yOtycRIN1ia/view?usp=sharing">
-              Final Thesis Draft: Holding the Line: Local Journalists'
+              Final Thesis Draft: Holding the Line: Local Journalists&apos;
               Experiences Amidst Economic Crisis and Digital Transformation in
-              Australia's News Ecosystem
+              Australia&apos;s News Ecosystem
             </LinkOut>
           </div>
         </LinksList>
@@ -525,7 +525,7 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
         <LinksList>
           <div>
             <LinkOut href="https://www.allysonfortustin.com/">
-              Allyson's Campaign Website
+              Allyson&apos;s Campaign Website
             </LinkOut>
           </div>
         </LinksList>
@@ -971,7 +971,7 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
           </div>
           <div>
             <LinkOut href="https://www.boehringer-ingelheim.com/us/about-us/sustainable-development">
-              Boehringer's Sustainable Development Strategy
+              Boehringer&apos;s Sustainable Development Strategy
             </LinkOut>
           </div>
         </LinksList>
@@ -1006,7 +1006,6 @@ export default function ProjectModal() {
   useBodyScrollLock(isOpen);
 
   const close = () => {
-    // restore to where the user was when they opened the modal
     const raw = sessionStorage.getItem("__project_bg_y__");
     sessionStorage.setItem(
       "__project_restore_y__",
@@ -1065,7 +1064,6 @@ export default function ProjectModal() {
             transition={{ duration: 0.18, ease: "easeOut" }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            {/* x: no border, no background */}
             <button
               type="button"
               onClick={close}
@@ -1080,9 +1078,7 @@ export default function ProjectModal() {
               <span className="text-2xl leading-none">×</span>
             </button>
 
-            {/* single scroll container: EVERYTHING scrolls */}
             <div className="h-full overflow-y-auto">
-              {/* header image: flush edges, only bottom border */}
               <div
                 className={[
                   "w-full",
@@ -1126,4 +1122,3 @@ export default function ProjectModal() {
     </AnimatePresence>
   );
 }
-
