@@ -1,4 +1,4 @@
-// components/PhotoCarousel.tsx
+// components/PhotoCarousel.tsx (drop-in replacement)
 "use client";
 
 import Link from "next/link";
@@ -10,7 +10,7 @@ export type PhotoItem = {
   href?: string;
 };
 
-const CARD_H = 320; // consistent height for all photos
+const CARD_H = 320;
 const GAP = 16;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
@@ -90,24 +90,43 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
 
   return (
     <div className="relative">
-      <div className="relative -mx-6 sm:-mx-10">
+      <div className="relative">
         <div
           ref={scrollerRef}
           className="
+            photoScroller
             flex gap-4
             overflow-x-auto overflow-y-hidden
-            px-6 sm:px-10
             snap-x snap-mandatory
             overscroll-x-contain
             scroll-smooth
-            [touch-action:pan-y]
             [-ms-overflow-style:none] [scrollbar-width:none]
+            [touch-action:pan-x]
           "
-          style={{ scrollPaddingLeft: 24, scrollPaddingRight: 24 }}
         >
           <style jsx>{`
-            div::-webkit-scrollbar {
+            .photoScroller::-webkit-scrollbar {
               display: none;
+            }
+
+            /* align with header buffer (no bleed / no extra padding by default) */
+            .photoScroller {
+              padding-left: 0px;
+              padding-right: 0px;
+              scroll-padding-left: 0px;
+              scroll-padding-right: 0px;
+              -webkit-overflow-scrolling: touch;
+            }
+
+            /* mobile: one card centered with peeks on both sides */
+            @media (max-width: 639px) {
+              .photoScroller {
+                --cardw: 82vw;
+                padding-left: calc((100% - var(--cardw)) / 2);
+                padding-right: calc((100% - var(--cardw)) / 2);
+                scroll-padding-left: calc((100% - var(--cardw)) / 2);
+                scroll-padding-right: calc((100% - var(--cardw)) / 2);
+              }
             }
           `}</style>
 
@@ -118,17 +137,17 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
               <article
                 data-photo-card
                 className="
-                  relative flex-shrink-0 snap-start
+                  relative flex-shrink-0
+                  snap-center sm:snap-start
                   overflow-hidden rounded-2xl
                   bg-white/5
                   shadow-[0_0_20px_rgba(0,0,0,0.14)]
+                  w-[82vw] sm:w-max
+                  max-w-[560px]
                 "
-                style={{
-                  height: CARD_H,
-                  width: "max-content",
-                }}
+                style={{ height: CARD_H }}
               >
-                <div className="relative h-full">
+                <div className="relative h-full w-full">
                   {item.image ? (
                     <img
                       src={item.image}
@@ -137,13 +156,13 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
                       decoding="async"
                       style={{
                         height: "100%",
-                        width: "auto",
+                        width: "100%",
                         display: "block",
                         objectFit: "cover",
                       }}
                     />
                   ) : (
-                    <div className="h-full w-[420px] bg-neutral-200" />
+                    <div className="h-full w-full bg-neutral-200" />
                   )}
 
                   <div className="absolute bottom-3 right-3 z-20">
@@ -176,7 +195,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="previous"
             onClick={() => scrollByOne(-1)}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="hidden sm:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="left" />
           </button>
@@ -187,7 +206,7 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
             type="button"
             aria-label="next"
             onClick={() => scrollByOne(1)}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="hidden sm:flex absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-transparent p-2 text-white/90 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <Chevron direction="right" />
           </button>
@@ -196,4 +215,3 @@ export default function PhotoCarousel({ items }: { items: PhotoItem[] }) {
     </div>
   );
 }
-
