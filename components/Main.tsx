@@ -1,9 +1,10 @@
-// components/Main.tsx
+// components/Main.tsx (drop-in replacement)
 "use client";
 
 import { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import HeaderMenu from "./HeaderMenu";
 import Brand from "./Brand";
 import HeaderGradient from "./HeaderGradient";
 import FooterGradient from "./FooterGradient";
@@ -167,7 +168,6 @@ const PROJECTS: StoryItem[] = PROJECT_CARD_ORDER.map(({ slug, image }) => {
   };
 });
 
-// UPDATED: photos section content (shuffled on each page load by PhotoCarousel)
 const PHOTOS: PhotoItem[] = [
   {
     image: "https://pub-d64d861253704466b2766bacee500351.r2.dev/pic_1.JPG",
@@ -360,59 +360,85 @@ export default function Main() {
         <ProjectModal />
       </Suspense>
 
-      <Brand />
-      <HeaderGradient />
-      <FooterGradient />
+      {/* recessed layer behind the page */}
+      <HeaderMenu />
 
-      <div className="w-full overflow-x-hidden px-6 sm:px-10 pt-[132px] md:pt-[152px] pb-16">
-        <section
-          id="bio"
-          className="scroll-mt-24 min-h-[calc(100svh-180px)] md:min-h-[calc(100svh-210px)]"
-        >
-          <div className="pt-[30svh] md:pt-[28svh]">
-            <div className="space-y-3">
-              {BIO_TEXT.map((line, i) => (
-                <p
-                  key={i}
-                  className="w-full text-2xl md:text-4xl leading-[1.15] tracking-tight text-white"
-                >
-                  {line}
-                </p>
-              ))}
+      {/* page layer that slides down to reveal recessed menu */}
+      <div
+        className="relative z-[55] will-change-transform"
+        style={{
+          transform: "translate3d(0, var(--header-menu-h, 0px), 0)",
+          transition: "transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        }}
+      >
+        {/* elegant page-edge shadow that casts onto the recessed menu */}
+        <div
+          aria-hidden
+          className="pointer-events-none fixed left-0 right-0 z-[70]"
+          style={{
+            top: "var(--header-menu-h, 0px)",
+            height: 1,
+            boxShadow: "0 22px 42px rgba(0,0,0,0.45)",
+            opacity: "var(--header-menu-open, 0)",
+            transition: "opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+          }}
+        />
+
+        <Brand />
+        <HeaderGradient />
+        <FooterGradient />
+
+        {/* IMPORTANT: remove header-menu padding math; page translate is the slide */}
+        <div className="w-full overflow-x-hidden px-6 sm:px-10 pt-[132px] md:pt-[152px] pb-16">
+          <section
+            id="bio"
+            className="scroll-mt-24 min-h-[calc(100svh-180px)] md:min-h-[calc(100svh-210px)]"
+          >
+            <div className="pt-[30svh] md:pt-[28svh]">
+              <div className="space-y-3">
+                {BIO_TEXT.map((line, i) => (
+                  <p
+                    key={i}
+                    className="w-full text-2xl md:text-4xl leading-[1.15] tracking-tight text-white"
+                  >
+                    {line}
+                  </p>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <ParallaxDivider amount={-18} />
+          <ParallaxDivider amount={-18} />
 
-        <section id="news" className="scroll-mt-24">
-          <div className="mb-4">
-            <SectionTitle>News</SectionTitle>
-          </div>
-          <StoryCarousel items={NEWS} />
-        </section>
+          <section id="news" className="scroll-mt-24">
+            <div className="mb-4">
+              <SectionTitle>News</SectionTitle>
+            </div>
+            <StoryCarousel items={NEWS} />
+          </section>
 
-        <ParallaxDivider amount={22} />
+          <ParallaxDivider amount={22} />
 
-        <section id="projects" className="scroll-mt-24">
-          <div className="mb-4">
-            <SectionTitle>Projects</SectionTitle>
-          </div>
-          <StoryCarousel items={PROJECTS} />
-        </section>
+          <section id="projects" className="scroll-mt-24">
+            <div className="mb-4">
+              <SectionTitle>Projects</SectionTitle>
+            </div>
+            <StoryCarousel items={PROJECTS} />
+          </section>
 
-        <ParallaxDivider amount={-14} />
+          <ParallaxDivider amount={-14} />
 
-        <section id="photos" className="scroll-mt-24">
-          <div className="mb-4">
-            <SectionTitle>Photos</SectionTitle>
-          </div>
-          <PhotoCarousel items={PHOTOS} />
-        </section>
+          <section id="photos" className="scroll-mt-24">
+            <div className="mb-4">
+              <SectionTitle>Photos</SectionTitle>
+            </div>
+            <PhotoCarousel items={PHOTOS} />
+          </section>
 
-        <ParallaxDivider amount={18} />
+          <ParallaxDivider amount={18} />
 
-        <Footer />
+          <Footer />
+        </div>
       </div>
     </main>
   );
