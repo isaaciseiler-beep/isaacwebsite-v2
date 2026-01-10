@@ -1,4 +1,4 @@
-// components/HeaderMenu.tsx
+// components/HeaderMenu.tsx (drop-in replacement)
 "use client";
 
 import * as React from "react";
@@ -62,14 +62,14 @@ export default function HeaderMenu() {
     setContactOpen(false);
   }, [modalOrOverlayOpen]);
 
-  // keep open state as a css var for smooth page transform + shadow
+  // open state as css var (shadow fade)
   React.useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty(CSS_VAR_OPEN, open ? "1" : "0");
     return () => root.style.setProperty(CSS_VAR_OPEN, "0");
   }, [open]);
 
-  // maintain css var height (used by page translate)
+  // height css var (page translate)
   React.useEffect(() => {
     const el = panelRef.current;
     const root = document.documentElement;
@@ -85,7 +85,7 @@ export default function HeaderMenu() {
     };
 
     apply();
-    const ro = new ResizeObserver(() => apply());
+    const ro = new ResizeObserver(apply);
     ro.observe(el);
 
     return () => {
@@ -108,122 +108,120 @@ export default function HeaderMenu() {
     "font-sans font-semibold tracking-[-0.04em] leading-none text-[clamp(64px,9.75vw,168px)]";
 
   return (
-    // z lower than page content so it feels "behind" (recessed)
-    <div className="fixed inset-x-0 top-0 z-[40]">
-      {/* trigger chevron (kept above everything) */}
-      <div className="pointer-events-none relative w-full px-6 sm:px-10 pt-6 sm:pt-8">
-        <motion.button
-          type="button"
-          aria-label={open ? "Close menu" : "Open menu"}
-          className="pointer-events-auto absolute left-1/2 top-6 sm:top-8 z-[80] -translate-x-1/2 rounded-full p-2 text-white/90 hover:text-white"
-          onClick={() => {
-            setOpen((v) => !v);
-            if (open) setContactOpen(false);
-          }}
-          initial={{ opacity: 0 }}
-          animate={
-            modalOrOverlayOpen ? { opacity: 0, y: -10 } : { opacity: 1, y: 0 }
-          }
-          transition={{ duration: 0.22, ease: "easeOut" }}
-        >
-          <Chevron open={open} />
-        </motion.button>
+    <>
+      {/* chevron trigger: true center of viewport, always above headers */}
+      <div className="fixed inset-x-0 top-0 z-[90]">
+        <div className="flex w-full justify-center pt-6 sm:pt-8">
+          <button
+            type="button"
+            aria-label={open ? "Close menu" : "Open menu"}
+            className="rounded-full p-2 text-white/90 hover:text-white"
+            style={{ pointerEvents: modalOrOverlayOpen ? "none" : "auto" }}
+            onClick={() => {
+              setOpen((v) => !v);
+              if (open) setContactOpen(false);
+            }}
+          >
+            <Chevron open={open} />
+          </button>
+        </div>
       </div>
 
-      {/* panel sits behind the "page" which slides down */}
-      <AnimatePresence initial={false}>
-        {open && !modalOrOverlayOpen && (
-          <motion.div
-            key="header-menu"
-            ref={panelRef}
-            initial={{ y: -10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -8, opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
-            className="relative w-full border-b border-white/10"
-            style={{ background: "#4154d6", color: "#283379" }}
-          >
-            {/* top padding leaves room for the fixed logo row */}
-            <div className="px-6 sm:px-10 pt-[112px] sm:pt-[132px] pb-10">
-              <nav className="space-y-4">
-                <Link
-                  href="https://www.linkedin.com/in/isaacseiler/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`block ${logoStyle} hover:opacity-80`}
-                >
-                  LinkedIn
-                </Link>
-
-                <Link
-                  href="https://github.com/isaaciseiler-beep"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`block ${logoStyle} hover:opacity-80`}
-                >
-                  GitHub
-                </Link>
-
-                <a
-                  href="/resume.pdf"
-                  download
-                  className={`block ${logoStyle} hover:opacity-80`}
-                >
-                  Resume
-                </a>
-
-                <button
-                  type="button"
-                  className={`block text-left ${logoStyle} hover:opacity-80`}
-                  onClick={() => setContactOpen((v) => !v)}
-                  aria-expanded={contactOpen}
-                >
-                  Contact
-                </button>
-              </nav>
-
-              <AnimatePresence initial={false}>
-                {contactOpen && (
-                  <motion.div
-                    key="contact"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
-                    className="mt-6 overflow-hidden"
+      {/* recessed menu panel behind the page */}
+      <div className="fixed inset-x-0 top-0 z-[40]">
+        <AnimatePresence initial={false}>
+          {open && !modalOrOverlayOpen && (
+            <motion.div
+              key="header-menu"
+              ref={panelRef}
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -8, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+              className="relative w-full border-b border-white/10"
+              style={{ background: "#4154d6", color: "#283379" }}
+            >
+              <div className="px-6 sm:px-10 pt-[112px] sm:pt-[132px] pb-10">
+                <nav className="space-y-4">
+                  <Link
+                    href="https://www.linkedin.com/in/isaacseiler/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block ${logoStyle} hover:opacity-80`}
                   >
-                    <div className="rounded-2xl bg-white/10 p-4">
-                      <iframe
-                        data-tally-src="https://tally.so/embed/Ekd91N?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
-                        loading="lazy"
-                        width="100%"
-                        height="203"
-                        frameBorder={0}
-                        marginHeight={0}
-                        marginWidth={0}
-                        title="Let's Chat"
-                      />
-                    </div>
+                    LinkedIn
+                  </Link>
 
-                    <Script
-                      src="https://tally.so/widgets/embed.js"
-                      strategy="afterInteractive"
-                      onLoad={() => {
-                        if (
-                          typeof window !== "undefined" &&
-                          (window as any).Tally?.loadEmbeds
-                        ) {
-                          (window as any).Tally.loadEmbeds();
-                        }
-                      }}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                  <Link
+                    href="https://github.com/isaaciseiler-beep"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block ${logoStyle} hover:opacity-80`}
+                  >
+                    GitHub
+                  </Link>
+
+                  <a
+                    href="/resume.pdf"
+                    download
+                    className={`block ${logoStyle} hover:opacity-80`}
+                  >
+                    Resume
+                  </a>
+
+                  <button
+                    type="button"
+                    className={`block text-left ${logoStyle} hover:opacity-80`}
+                    onClick={() => setContactOpen((v) => !v)}
+                    aria-expanded={contactOpen}
+                  >
+                    Contact
+                  </button>
+                </nav>
+
+                <AnimatePresence initial={false}>
+                  {contactOpen && (
+                    <motion.div
+                      key="contact"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
+                      className="mt-6 overflow-hidden"
+                    >
+                      <div className="rounded-2xl bg-white/10 p-4">
+                        <iframe
+                          data-tally-src="https://tally.so/embed/Ekd91N?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+                          loading="lazy"
+                          width="100%"
+                          height="203"
+                          frameBorder={0}
+                          marginHeight={0}
+                          marginWidth={0}
+                          title="Let's Chat"
+                        />
+                      </div>
+
+                      <Script
+                        src="https://tally.so/widgets/embed.js"
+                        strategy="afterInteractive"
+                        onLoad={() => {
+                          if (
+                            typeof window !== "undefined" &&
+                            (window as any).Tally?.loadEmbeds
+                          ) {
+                            (window as any).Tally.loadEmbeds();
+                          }
+                        }}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
