@@ -12,7 +12,7 @@ type Item = {
   title: string;
   href: string;
   desc: string;
-  source?: string; // pill under title (except Publications)
+  source?: string | string[]; // pill(s) under title (except Publications)
 };
 
 type Section = {
@@ -110,8 +110,14 @@ const SECTIONS: Section[] = [
       },
       {
         title: "AI 2027",
-        source: "Daniel Kokotajlo", "Scott Alexander", "Thomas Larsen", "Eli Lifland", "Romeo Dean",
-        href: "https://www.amazon.com/Brief-History-Intelligence-Humans-Breakthroughs/dp/0063286343",
+        source: [
+          "Daniel Kokotajlo",
+          "Scott Alexander",
+          "Thomas Larsen",
+          "Eli Lifland",
+          "Romeo Dean",
+        ],
+        href: "https://ai-2027.com/",
         desc: "Scary projections of the impacts of superintelligence.",
       },
       {
@@ -150,7 +156,6 @@ const SECTIONS: Section[] = [
         href: "https://www.amazon.com/AI-2041-Ten-Visions-Future/dp/0593132460",
         desc: "Speculative short stories paired with technical analysis to explore plausible global AI futures without pretending to predict them.",
       },
-
     ],
   },
   {
@@ -164,7 +169,7 @@ const SECTIONS: Section[] = [
       },
       {
         title: "The companies making the most money from AI",
-        source: "Josh Dzieza", "Hayden Field",
+        source: ["Josh Dzieza", "Hayden Field"],
         href: "https://www.theverge.com/cs/features/831818/ai-mercor-handshake-scale-surge-staffing-companies",
         desc: "A deep look at the ecosystem of data, labor, and vendors powering frontier AI. Helpful for seeing who benefits first—and what scale actually requires behind the scenes.",
       },
@@ -336,6 +341,19 @@ function Pill({ text }: { text: string }) {
   );
 }
 
+function SourcePills({ source }: { source: Item["source"] }) {
+  if (!source) return null;
+  const arr = Array.isArray(source) ? source : [source];
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {arr.map((name) => (
+        <Pill key={name} text={name} />
+      ))}
+    </div>
+  );
+}
+
 function SectionRail({ name, items }: { name: string; items: Item[] }) {
   const showPills = name !== "Publications";
 
@@ -387,7 +405,7 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
                     {it.title}
                   </div>
 
-                  {showPills && it.source ? <Pill text={it.source} /> : null}
+                  {showPills ? <SourcePills source={it.source} /> : null}
                 </div>
 
                 <div className="mt-auto text-[#a1a1aa] text-[14px] sm:text-[15px] leading-[1.6]">
