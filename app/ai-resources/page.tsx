@@ -298,8 +298,7 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
 
   // page buffers are px-6 / sm:px-10 — keep those gutters, but let the rail bleed over them
   const BLEED_BOTH = "-mx-6 sm:-mx-10";
-  const LEFT_BUF = "pl-6 sm:pl-10";
-  const RIGHT_BUF = "pr-6 sm:pr-10";
+  const GUTTER = "px-6 sm:px-10"; // key: locks start to header + keeps right buffer too
 
   return (
     <section className="mt-12">
@@ -315,8 +314,7 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
             "snap-x snap-mandatory",
             "overscroll-x-contain",
             "[-webkit-overflow-scrolling:touch]",
-            LEFT_BUF, // first card starts exactly where headers do
-            RIGHT_BUF, // lets content scroll into/right over the gutter cleanly
+            GUTTER, // first card starts exactly where headers do + right gutter preserved
           ].join(" ")}
           aria-label={name}
         >
