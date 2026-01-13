@@ -5,14 +5,14 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Isaac's AI Resources",
   description: "Getting the most out of Generative AI",
-  robots: { index: false, follow: false }, // hosted, but not meant to be discoverable
+  robots: { index: false, follow: false },
 };
 
 type Item = {
   title: string;
   href: string;
   desc: string;
-  source?: string; // shown as a pill under the title (except Publications)
+  source?: string; // pill under title (except Publications)
 };
 
 type Section = {
@@ -338,21 +338,22 @@ const SECTIONS: Section[] = [
 
 function Pill({ text }: { text: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/10 px-2.5 py-1 text-[12px] leading-none text-white/80">
+    <span
+      className={[
+        "inline-flex max-w-full",
+        "whitespace-normal break-words",
+        "rounded-full border border-white/15",
+        "bg-white text-black/85",
+        "px-2.5 py-1",
+        "text-[12px] leading-[1.15]",
+      ].join(" ")}
+    >
       {text}
     </span>
   );
 }
 
-function SectionRail({
-  name,
-  items,
-  bleedClass,
-}: {
-  name: string;
-  items: Item[];
-  bleedClass: string;
-}) {
+function SectionRail({ name, items }: { name: string; items: Item[] }) {
   const showPills = name !== "Publications";
 
   return (
@@ -361,15 +362,18 @@ function SectionRail({
         <h2 className="text-[22px] tracking-[-0.01em]">{name}</h2>
       </div>
 
-      {/* bleed past the side padding so cards can be seen “above” the buffers,
-          but keep the first card aligned to the same buffer via inner padding */}
-      <div className={bleedClass}>
+      {/* left stays aligned to buffers, right bleeds over the right buffer */}
+      <div className="relative -mr-6 sm:-mr-10">
         <div
           className={[
-            "flex gap-3 overflow-x-auto pr-1 pb-3",
+            "flex gap-3 overflow-x-auto pb-3",
             "snap-x snap-mandatory",
             "overscroll-x-contain",
             "[-webkit-overflow-scrolling:touch]",
+            // keep the starting position aligned to the left buffer:
+            "pl-6 sm:pl-10",
+            // minimal right padding so content can visually sit over the right buffer:
+            "pr-2",
           ].join(" ")}
           aria-label={name}
         >
@@ -409,11 +413,6 @@ function SectionRail({
 }
 
 export default function AiResourcesPage() {
-  // outer padding (buffers) for the page
-  // rails then “bleed” to show card edges beyond the buffer, while keeping start aligned.
-  const railBleed =
-    "-mx-6 px-6 sm:-mx-10 sm:px-10"; // match the page buffers
-
   return (
     <div className="w-full overflow-x-hidden px-6 sm:px-10 pt-10 pb-20">
       <header className="mx-auto w-full max-w-[1100px] lg:max-w-[1200px] 2xl:max-w-[1400px]">
@@ -425,10 +424,12 @@ export default function AiResourcesPage() {
           <span className="text-sm">Go to main site</span>
         </Link>
 
-        <h1 className="text-[34px] sm:text-[40px] leading-[1.08] tracking-[-0.02em] m-0">
+        {/* +50% title sizing vs prior */}
+        <h1 className="text-[42px] sm:text-[60px] leading-[1.02] tracking-[-0.03em] m-0">
           Isaac&apos;s AI Resources
         </h1>
-        <div className="text-[#a1a1aa] text-[16px] sm:text-[17px] leading-[1.55] mt-2">
+
+        <div className="text-[#a1a1aa] text-[16px] sm:text-[17px] leading-[1.55] mt-3">
           Getting the most out of Generative AI
         </div>
 
@@ -456,15 +457,9 @@ export default function AiResourcesPage() {
 
       <div className="mx-auto w-full max-w-[1100px] lg:max-w-[1200px] 2xl:max-w-[1400px]">
         {SECTIONS.map((s) => (
-          <SectionRail
-            key={s.name}
-            name={s.name}
-            items={s.items}
-            bleedClass={railBleed}
-          />
+          <SectionRail key={s.name} name={s.name} items={s.items} />
         ))}
       </div>
     </div>
   );
 }
-
