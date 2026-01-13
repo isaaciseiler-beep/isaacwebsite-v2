@@ -4,6 +4,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Isaac's AI Resources",
+  description: "Getting the most out of Generative AI",
   robots: { index: false, follow: false },
 };
 
@@ -149,16 +150,22 @@ const SECTIONS: Section[] = [
     name: "Videos",
     items: [
       {
-        title: "Building LLMs",
-        source: "Stanford",
+        title: "Stanford CS229: Building LLMs",
+        source: "YouTube",
         href: "https://www.youtube.com/watch?v=9vM4p9NN0Ts",
-        desc: "The best technical overview of how large language models are trained and evaluated. It's a long watch, but well worth it.",
+        desc: "A technical overview of how large language models are trained and evaluated. Best for viewers who want more than metaphors and are okay with some ML vocabulary.",
       },
       {
         title: "How AI Systems Reason",
-        source: "Dwarkesh Patel",
+        source: "YouTube",
         href: "https://www.youtube.com/watch?v=64lXQP6cs5M",
         desc: "Visual walkthrough of modern AI capabilities and limitations, with concrete examples. Good for building intuition about why models can sound confident while still being wrong.",
+      },
+      {
+        title: "Trapped in a ChatGPT Spiral",
+        source: "YouTube",
+        href: "https://www.youtube.com/watch?v=AxQVf7Ikaso",
+        desc: "A reported audio story about heavy chatbot use and how feedback loops can become harmful. Useful for discussing boundaries, guardrails, and mental-health-adjacent risks.",
       },
     ],
   },
@@ -166,40 +173,34 @@ const SECTIONS: Section[] = [
     name: "Podcasts",
     items: [
       {
+        title: "OpenAI Podcast",
+        source: "OpenAI",
+        href: "https://openai.com/podcast/",
+        desc: "Conversations with researchers and builders about how AI is developed and deployed. Good for hearing technical ideas explained through real product and research decisions.",
+      },
+      {
         title: "The Vergecast",
         source: "The Verge",
         href: "https://www.theverge.com/the-vergecast",
         desc: "Weekly discussion of tech news, culture, and AI storylines. Good if you want context and debate rather than just headlines.",
       },
       {
-        title: "Access",
+        title: "Access (Vox)",
         source: "Vox",
         href: "https://podcasts.voxmedia.com/show/access",
         desc: "Explores how technology shapes power, work, and access in everyday life. Useful for connecting AI to broader questions about society, inequality, and institutions.",
       },
       {
-        title: "Hard Fork",
+        title: "Hard Fork (NYT)",
         source: "The New York Times",
         href: "https://www.nytimes.com/column/hard-fork",
         desc: "NYT’s tech audio + newsletter covering AI, business, and internet culture. Good for staying current with thoughtful reporting and occasional skepticism.",
       },
       {
-        title: "Trapped in a ChatGPT Spiral (Episode)",
-        source: "The Daily",
-        href: "https://www.youtube.com/watch?v=AxQVf7Ikaso",
-        desc: "A reported audio story about heavy chatbot use and how feedback loops can become harmful. Useful for discussing boundaries, guardrails, and mental-health-adjacent risks.",
-      },
-      {
-        title: "She Fell in Love With ChatGPT — An Update (Episode)",
-        source: "The Daily",
+        title: "The Daily: She Fell in Love With ChatGPT — An Update",
+        source: "Apple Podcasts",
         href: "https://podcasts.apple.com/tw/podcast/she-fell-in-love-with-chatgpt-an-update/id1200361736?i=1000743300165",
         desc: "Follow-up episode featuring NYT reporter Kashmir Hill on relationships with chatbots. Useful for discussing companionship, vulnerability, and how “helpful” can blur into dependence.",
-      },
-      {
-        title: "OpenAI Podcast",
-        source: "OpenAI",
-        href: "https://openai.com/podcast/",
-        desc: "Conversations with researchers and builders about how AI is developed and deployed. Good for hearing technical ideas explained through real product and research decisions.",
       },
     ],
   },
@@ -208,7 +209,7 @@ const SECTIONS: Section[] = [
     items: [
       {
         title: "Dia Browser",
-        source: "The Browser Company",
+        source: "The Browser Company of New York",
         href: "https://www.diabrowser.com/invite/N1M0E0",
         desc: "This is my favorite AI application - a browser I use on my laptop. Feel free to use my referral link to join for free.",
       },
@@ -296,8 +297,6 @@ function Pill({ text }: { text: string }) {
 function SectionRail({ name, items }: { name: string; items: Item[] }) {
   const showPills = name !== "Publications";
 
-  if (items.length === 0) return null;
-
   return (
     <section className="mt-12">
       <div className="flex items-baseline justify-between gap-4 mb-4">
@@ -305,39 +304,26 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
       </div>
 
       <div className="relative">
-        {/* bleed into buffers, but content starts at the same buffer as headers */}
         <div className="relative -mx-6 sm:-mx-10">
           <div
-            className="
-              railScroller
-              flex gap-3
-              overflow-x-auto overflow-y-hidden
-              px-6 sm:px-10
-              snap-x snap-mandatory
-              overscroll-x-contain
-              [-ms-overflow-style:none] [scrollbar-width:none]
-              pb-3
-            "
+            className={[
+              "railScroller",
+              "flex gap-3",
+              "overflow-x-auto overflow-y-hidden",
+              "px-6 sm:px-10", // aligns start with header buffer
+              "snap-x snap-mandatory",
+              "overscroll-x-contain",
+              "[-ms-overflow-style:none] [scrollbar-width:none]",
+              "pb-3",
+              "scroll-smooth",
+              "touch-pan-x touch-pan-y",
+              "[scroll-padding-left:24px] [scroll-padding-right:24px]",
+              "sm:[scroll-padding-left:40px] sm:[scroll-padding-right:40px]",
+              "[-webkit-overflow-scrolling:touch]",
+              "[&::-webkit-scrollbar]:hidden",
+            ].join(" ")}
             aria-label={name}
           >
-            <style jsx>{`
-              .railScroller::-webkit-scrollbar {
-                display: none;
-              }
-              .railScroller {
-                -webkit-overflow-scrolling: touch;
-                touch-action: pan-x pan-y;
-                scroll-padding-left: 24px;
-                scroll-padding-right: 24px;
-              }
-              @media (min-width: 640px) {
-                .railScroller {
-                  scroll-padding-left: 40px;
-                  scroll-padding-right: 40px;
-                }
-              }
-            `}</style>
-
             {items.map((it) => (
               <a
                 key={it.href + it.title}
@@ -350,7 +336,7 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
                   "rounded-[22px] p-4",
                   "w-[196px] sm:w-[220px] lg:w-[240px]",
                   "aspect-[9/16] min-h-[340px]",
-                  "flex flex-col", // enables bottom anchoring
+                  "flex flex-col",
                   "hover:border-[#3a3a40] transition-colors",
                 ].join(" ")}
               >
@@ -358,10 +344,10 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
                   <div className="text-[22px] sm:text-[26px] font-[580] leading-[1.12] tracking-[-0.01em]">
                     {it.title}
                   </div>
+
                   {showPills && it.source ? <Pill text={it.source} /> : null}
                 </div>
 
-                {/* description anchored to bottom */}
                 <div className="mt-auto text-[#a1a1aa] text-[14px] sm:text-[15px] leading-[1.6]">
                   {it.desc}
                 </div>
