@@ -340,10 +340,10 @@ function Pill({ text }: { text: string }) {
   return (
     <span
       className={[
-        "inline-flex max-w-full",
+        "inline-flex w-fit max-w-full self-start",
         "whitespace-normal break-words",
-        "rounded-full border border-white/15",
-        "bg-white text-black/85",
+        "rounded-full border border-black/10",
+        "bg-white text-black/90",
         "px-2.5 py-1",
         "text-[12px] leading-[1.15]",
       ].join(" ")}
@@ -362,17 +362,17 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
         <h2 className="text-[22px] tracking-[-0.01em]">{name}</h2>
       </div>
 
-      {/* left stays aligned to buffers, right bleeds over the right buffer */}
-      <div className="relative -mr-6 sm:-mr-10">
+      {/* rail bleeds over the RIGHT buffer only; left edge stays aligned with header */}
+      <div className="relative z-10 -mr-6 sm:-mr-10">
         <div
           className={[
             "flex gap-3 overflow-x-auto pb-3",
             "snap-x snap-mandatory",
             "overscroll-x-contain",
             "[-webkit-overflow-scrolling:touch]",
-            // keep the starting position aligned to the left buffer:
-            "pl-6 sm:pl-10",
-            // minimal right padding so content can visually sit over the right buffer:
+            // important: NO left padding here, so the first tile starts where the header starts
+            "pl-0",
+            // tiny right padding, so tiles can visually sit over the right buffer
             "pr-2",
           ].join(" ")}
           aria-label={name}
@@ -385,7 +385,8 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
               rel="noreferrer"
               className={[
                 "snap-start shrink-0",
-                "bg-[#141416] border border-[#232327]",
+                // tiles black
+                "bg-[#000000] border border-[#232327]",
                 "rounded-[22px] p-4",
                 "w-[196px] sm:w-[220px] lg:w-[240px]",
                 "aspect-[9/16] min-h-[340px]",
@@ -424,7 +425,6 @@ export default function AiResourcesPage() {
           <span className="text-sm">Go to main site</span>
         </Link>
 
-        {/* +50% title sizing vs prior */}
         <h1 className="text-[42px] sm:text-[60px] leading-[1.02] tracking-[-0.03em] m-0">
           Isaac&apos;s AI Resources
         </h1>
