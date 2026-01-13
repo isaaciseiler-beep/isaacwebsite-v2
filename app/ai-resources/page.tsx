@@ -4,7 +4,6 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Isaac's AI Resources",
-  description: "Getting the most out of Generative AI",
   robots: { index: false, follow: false },
 };
 
@@ -209,7 +208,7 @@ const SECTIONS: Section[] = [
     items: [
       {
         title: "Dia Browser",
-        source: "The Browser Company of New York",
+        source: "The Browser Company",
         href: "https://www.diabrowser.com/invite/N1M0E0",
         desc: "This is my favorite AI application - a browser I use on my laptop. Feel free to use my referral link to join for free.",
       },
@@ -297,9 +296,10 @@ function Pill({ text }: { text: string }) {
 function SectionRail({ name, items }: { name: string; items: Item[] }) {
   const showPills = name !== "Publications";
 
-  // bleed only on the right so the rail starts exactly at the buffer edge,
-  // but can scroll underneath/over the right buffer.
-  const BLEED_RIGHT = "-mr-6 sm:-mr-10";
+  // page buffers are px-6 / sm:px-10 — keep those gutters, but let the rail bleed over them
+  const BLEED_BOTH = "-mx-6 sm:-mx-10";
+  const LEFT_BUF = "pl-6 sm:pl-10";
+  const RIGHT_BUF = "pr-6 sm:pr-10";
 
   return (
     <section className="mt-12">
@@ -307,15 +307,16 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
         <h2 className="text-[22px] tracking-[-0.01em]">{name}</h2>
       </div>
 
-      <div className={`relative z-10 ${BLEED_RIGHT}`}>
+      {/* rail sits above the page gutters while still starting aligned with the header */}
+      <div className={`relative z-10 ${BLEED_BOTH}`}>
         <div
           className={[
             "flex gap-3 overflow-x-auto pb-3",
             "snap-x snap-mandatory",
             "overscroll-x-contain",
             "[-webkit-overflow-scrolling:touch]",
-            // end padding so the last tile can scroll into place cleanly
-            "pr-6 sm:pr-10",
+            LEFT_BUF, // first card starts exactly where headers do
+            RIGHT_BUF, // lets content scroll into/right over the gutter cleanly
           ].join(" ")}
           aria-label={name}
         >
@@ -331,8 +332,7 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
                 "rounded-[22px] p-4",
                 "w-[196px] sm:w-[220px] lg:w-[240px]",
                 "aspect-[9/16] min-h-[340px]",
-                // top stays top, description anchors to bottom
-                "flex flex-col",
+                "flex flex-col", // enables bottom-anchored description
                 "hover:border-[#3a3a40] transition-colors",
               ].join(" ")}
             >
@@ -344,6 +344,7 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
                 {showPills && it.source ? <Pill text={it.source} /> : null}
               </div>
 
+              {/* description anchored to bottom */}
               <div className="mt-auto text-[#a1a1aa] text-[14px] sm:text-[15px] leading-[1.6]">
                 {it.desc}
               </div>
