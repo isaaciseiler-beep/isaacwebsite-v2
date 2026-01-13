@@ -296,9 +296,7 @@ function Pill({ text }: { text: string }) {
 function SectionRail({ name, items }: { name: string; items: Item[] }) {
   const showPills = name !== "Publications";
 
-  // page buffers are px-6 / sm:px-10 — keep those gutters, but let the rail bleed over them
-  const BLEED_BOTH = "-mx-6 sm:-mx-10";
-  const GUTTER = "px-6 sm:px-10"; // key: locks start to header + keeps right buffer too
+  if (items.length === 0) return null;
 
   return (
     <section className="mt-12">
@@ -306,48 +304,70 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
         <h2 className="text-[22px] tracking-[-0.01em]">{name}</h2>
       </div>
 
-      {/* rail sits above the page gutters while still starting aligned with the header */}
-      <div className={`relative z-10 ${BLEED_BOTH}`}>
-        <div
-          className={[
-            "flex gap-3 overflow-x-auto pb-3",
-            "snap-x snap-mandatory",
-            "overscroll-x-contain",
-            "[-webkit-overflow-scrolling:touch]",
-            GUTTER, // first card starts exactly where headers do + right gutter preserved
-          ].join(" ")}
-          aria-label={name}
-        >
-          {items.map((it) => (
-            <a
-              key={it.href + it.title}
-              href={it.href}
-              target="_blank"
-              rel="noreferrer"
-              className={[
-                "snap-start shrink-0",
-                "bg-[#000000] border border-[#232327]",
-                "rounded-[22px] p-4",
-                "w-[196px] sm:w-[220px] lg:w-[240px]",
-                "aspect-[9/16] min-h-[340px]",
-                "flex flex-col", // enables bottom-anchored description
-                "hover:border-[#3a3a40] transition-colors",
-              ].join(" ")}
-            >
-              <div className="grid gap-2">
-                <div className="text-[22px] sm:text-[26px] font-[580] leading-[1.12] tracking-[-0.01em]">
-                  {it.title}
+      <div className="relative">
+        {/* bleed into buffers, but content starts at the same buffer as headers */}
+        <div className="relative -mx-6 sm:-mx-10">
+          <div
+            className="
+              railScroller
+              flex gap-3
+              overflow-x-auto overflow-y-hidden
+              px-6 sm:px-10
+              snap-x snap-mandatory
+              overscroll-x-contain
+              [-ms-overflow-style:none] [scrollbar-width:none]
+              pb-3
+            "
+            aria-label={name}
+          >
+            <style jsx>{`
+              .railScroller::-webkit-scrollbar {
+                display: none;
+              }
+              .railScroller {
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-x pan-y;
+                scroll-padding-left: 24px;
+                scroll-padding-right: 24px;
+              }
+              @media (min-width: 640px) {
+                .railScroller {
+                  scroll-padding-left: 40px;
+                  scroll-padding-right: 40px;
+                }
+              }
+            `}</style>
+
+            {items.map((it) => (
+              <a
+                key={it.href + it.title}
+                href={it.href}
+                target="_blank"
+                rel="noreferrer"
+                className={[
+                  "snap-start shrink-0",
+                  "bg-[#000000] border border-[#232327]",
+                  "rounded-[22px] p-4",
+                  "w-[196px] sm:w-[220px] lg:w-[240px]",
+                  "aspect-[9/16] min-h-[340px]",
+                  "flex flex-col", // enables bottom anchoring
+                  "hover:border-[#3a3a40] transition-colors",
+                ].join(" ")}
+              >
+                <div className="grid gap-2">
+                  <div className="text-[22px] sm:text-[26px] font-[580] leading-[1.12] tracking-[-0.01em]">
+                    {it.title}
+                  </div>
+                  {showPills && it.source ? <Pill text={it.source} /> : null}
                 </div>
 
-                {showPills && it.source ? <Pill text={it.source} /> : null}
-              </div>
-
-              {/* description anchored to bottom */}
-              <div className="mt-auto text-[#a1a1aa] text-[14px] sm:text-[15px] leading-[1.6]">
-                {it.desc}
-              </div>
-            </a>
-          ))}
+                {/* description anchored to bottom */}
+                <div className="mt-auto text-[#a1a1aa] text-[14px] sm:text-[15px] leading-[1.6]">
+                  {it.desc}
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </section>
