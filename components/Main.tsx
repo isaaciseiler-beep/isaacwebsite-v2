@@ -15,7 +15,7 @@ import ProjectModal, { PROJECT_TEMPLATES } from "./ProjectModal";
 
 const BIO_TEXT = [
   "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of OpenAI's ChatGPT Lab.",
-  "I've managed programs on for a Member of Congress, published work with OpenAI, built a congressional office, founded my own consultancy, and led AI workshops for educators.",
+  "I've managed the communications program for a Member of Congress, published work with OpenAI, built a congressional office, founded my own consultancy, and led AI workshops for educators.",
   "I'm currently in the market for tech roles starting Summer 2026.",
 ];
 
@@ -85,7 +85,7 @@ const NEWS: StoryItem[] = [
   },
   {
     source: "Missouri College Media Awards",
-    title: "Missouri College Media Awards",
+    title: "Won Award for Best College Newspaper Photography",
     image:
       "https://pub-41d52824b0bb4f44898c39e1c3c63cb8.r2.dev/press/washuspring.png",
     href: "https://source.washu.edu/2025/05/student-life-wins-best-newspaper-honor-at-missouri-college-media-awards/",
