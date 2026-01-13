@@ -207,7 +207,7 @@ const SECTIONS: Section[] = [
   {
     name: "Tools",
     items: [
-       {
+      {
         title: "Dia Browser",
         source: "The Browser Company of New York",
         href: "https://www.diabrowser.com/invite/N1M0E0",
@@ -219,7 +219,7 @@ const SECTIONS: Section[] = [
         href: "https://claude.ai/new",
         desc: "Conversational AI often used for writing, analysis, and longer context tasks. Useful as a second model to compare outputs and reduce single-tool dependence.",
       },
-       {
+      {
         title: "ChatGPT Desktop App",
         source: "OpenAI",
         href: "https://chatgpt.com/features/desktop/",
@@ -297,9 +297,9 @@ function Pill({ text }: { text: string }) {
 function SectionRail({ name, items }: { name: string; items: Item[] }) {
   const showPills = name !== "Publications";
 
-  // your page buffers are px-6 / sm:px-10 — match them here
-  const LEFT_BUF = "pl-6 sm:pl-10";
-  const BLEED_BOTH = "-mx-6 sm:-mx-10"; // allow content to sit above both buffers
+  // bleed only on the right so the rail starts exactly at the buffer edge,
+  // but can scroll underneath/over the right buffer.
+  const BLEED_RIGHT = "-mr-6 sm:-mr-10";
 
   return (
     <section className="mt-12">
@@ -307,16 +307,15 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
         <h2 className="text-[22px] tracking-[-0.01em]">{name}</h2>
       </div>
 
-      {/* bleed over both buffers, but lock the starting position to header via inner left padding */}
-      <div className={`relative z-10 ${BLEED_BOTH}`}>
+      <div className={`relative z-10 ${BLEED_RIGHT}`}>
         <div
           className={[
             "flex gap-3 overflow-x-auto pb-3",
             "snap-x snap-mandatory",
             "overscroll-x-contain",
             "[-webkit-overflow-scrolling:touch]",
-            LEFT_BUF, // keeps first tile aligned with headers (locked)
-            "pr-2", // minimal right padding; cards can sit over right buffer
+            // end padding so the last tile can scroll into place cleanly
+            "pr-6 sm:pr-10",
           ].join(" ")}
           aria-label={name}
         >
@@ -332,7 +331,8 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
                 "rounded-[22px] p-4",
                 "w-[196px] sm:w-[220px] lg:w-[240px]",
                 "aspect-[9/16] min-h-[340px]",
-                "grid content-start gap-3",
+                // top stays top, description anchors to bottom
+                "flex flex-col",
                 "hover:border-[#3a3a40] transition-colors",
               ].join(" ")}
             >
@@ -344,7 +344,7 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
                 {showPills && it.source ? <Pill text={it.source} /> : null}
               </div>
 
-              <div className="text-[#a1a1aa] text-[14px] sm:text-[15px] leading-[1.6]">
+              <div className="mt-auto text-[#a1a1aa] text-[14px] sm:text-[15px] leading-[1.6]">
                 {it.desc}
               </div>
             </a>
