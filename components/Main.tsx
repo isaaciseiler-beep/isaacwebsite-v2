@@ -14,8 +14,8 @@ import StoryCarousel, { type StoryItem } from "./StoryCarousel";
 import ProjectModal, { PROJECT_TEMPLATES } from "./ProjectModal";
 
 const BIO_TEXT = [
-  "I'm Isaac, a recent graduate of Washington University in St. Louis, Fulbright and Truman Scholar, and a member of OpenAI's ChatGPT Lab.",
-  "I've managed the communications program for a Member of Congress, published work with OpenAI, built a congressional office, founded my own consultancy, and led AI workshops for educators.",
+  "I'm Isaac, a recent WashU graduate, Fulbright and Truman Scholar, and a member of OpenAI's ChatGPT Lab.",
+  "I've managed the communications program for a Member of Congress, published work with OpenAI, built a congressional office, founded my own consultancy, and conducted international research on the social and material impacts of AI and the Internet.",
   "I'm currently in the market for tech roles starting Summer 2026.",
 ];
 
