@@ -4,7 +4,6 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Isaac's AI Resources",
-  description: "Getting the most out of Generative AI",
   robots: { index: false, follow: false },
 };
 
@@ -22,7 +21,7 @@ type Section = {
 
 const SECTIONS: Section[] = [
   {
-    name: "Trainings",
+    name: "Trainings 🏋",
     items: [
       {
         title: "OpenAI Forum",
@@ -69,7 +68,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    name: "News",
+    name: "News 🗞️",
     items: [
       {
         title: "Platformer",
@@ -94,7 +93,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    name: "Reading",
+    name: "Reading 📖",
     items: [
       {
         title: "Co-Intelligence",
@@ -159,7 +158,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    name: "Articles",
+    name: "Articles 📰",
     items: [
       {
         title: "It’s the great AGI rebrand",
@@ -194,7 +193,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    name: "Videos",
+    name: "Videos 📺",
     items: [
       {
         title: "Stanford CS229: Building LLMs",
@@ -211,7 +210,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    name: "Podcasts",
+    name: "Podcasts 🎧",
     items: [
       {
         title: "The Vergecast",
@@ -252,7 +251,7 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    name: "Tools",
+    name: "Tools 🧰",
     items: [
       {
         title: "Dia Browser",
