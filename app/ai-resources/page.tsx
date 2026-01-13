@@ -28,73 +28,37 @@ const SECTIONS: Section[] = [
         title: "OpenAI Forum",
         source: "OpenAI",
         href: "https://forum.openai.com/home",
-        desc: "Community discussions on best practices, workflows, and problem-solving with OpenAI tools. Great when you want examples from real users and quick answers to common questions.",
-      },
-      {
-        title: "OpenAI Academy",
-        source: "OpenAI",
-        href: "https://academy.openai.com/",
-        desc: "Structured learning paths on prompting, practical use cases, and responsible adoption. A solid starting point if you want a guided sequence rather than scattered tips.",
-      },
-      {
-        title: "OpenAI K–12 Educators Group",
-        source: "OpenAI",
-        href: "https://academy.openai.com/home/clubs/k-12-education-aacga/overview",
-        desc: "Educator-focused club with examples, recorded sessions, and classroom-ready ideas. Useful for seeing how other teachers design assignments, guardrails, and policies.",
-      },
-      {
-        title: "Getting Started with ChatGPT Edu",
-        source: "OpenAI",
-        href: "https://academy.openai.com/home/clubs/k-12-education-aacga/videos/getting-started-with-chatgpt-edu-2025-05-06",
-        desc: "Intro recording covering what ChatGPT Edu is, how schools use it, and practical ways to start. Helpful if you’re setting norms for students and staff from day one.",
-      },
-      {
-        title: "ChatGPT Fundamentals",
-        source: "OpenAI",
-        href: "https://academy.openai.com/home/clubs/work-users-ynjqu/resources/chatgpt-basics",
-        desc: "Core concepts for getting value fast: clear instructions, iteration, and checking outputs. Good as a baseline before exploring more advanced prompting patterns.",
-      },
-      {
-        title: "Prompting Training",
-        source: "OpenAI",
-        href: "https://academy.openai.com/home/clubs/work-users-ynjqu/resources/prompting",
-        desc: "Tactics for writing prompts that are specific, constrained, and repeatable. Includes patterns like roles, examples, checklists, and feedback loops to improve consistency.",
-      },
-      {
-        title: "ChatGPT 101",
-        source: "OpenAI",
-        href: "https://academy.openai.com/home/clubs/work-users-ynjqu/videos/chatgpt-101-a-guide-to-your-ai-superassistant-recording",
-        desc: "A practical walkthrough of everyday workflows (drafting, planning, rewriting, summarizing). Great for building a small set of reliable “go-to” prompts for work and school.",
-      },
-      {
-        title: "ChatGPT 102",
-        source: "OpenAI",
-        href: "https://academy.openai.com/home/clubs/work-users-ynjqu/videos/chatgpt-102-leveraging-ai-to-do-your-best-work-recording",
-        desc: "More advanced techniques: multi-step prompting, evaluation, and using AI as a collaborator. Helpful for projects where quality control and revision cycles matter.",
+        desc: "Community discussions on best practices, workflows, and problem-solving with OpenAI tools. Great when you want examples from real users and quick answers to common questions. Application required to join",
       },
       {
         title: "Anthropic Academy",
         source: "Anthropic",
         href: "https://www.anthropic.com/learn",
-        desc: "Guides and training materials on using LLMs effectively and responsibly. Especially useful for understanding model behavior, safety concepts, and real-world limitations.",
+        desc: "Guides and training materials on using Claude effectively and responsibly. Lots of technical explainations of LLMs, model behavior, and more - all for free.",
       },
       {
-        title: "Teaching AI Fluency",
-        source: "Anthropic",
-        href: "https://anthropic.skilljar.com/teaching-ai-fluency",
-        desc: "Professional development designed for educators teaching AI literacy. Focuses on practical classroom integration, student skills, and avoiding common failure modes.",
+        title: "OpenAI Academy",
+        source: "OpenAI",
+        href: "https://academy.openai.com/",
+        desc: "Courses on AI and how to maximize ChatGPT, all for free, curated by experts. Included topics: prompt engineering, education, journalism, and more.",
+      },
+      {
+        title: "OpenAI K–12 Educators Group",
+        source: "OpenAI",
+        href: "https://academy.openai.com/home/clubs/k-12-education-aacga/overview",
+        desc: "Educator-focused community group with recorded sessions and classroom-ready ideas. Useful for seeing how teachers leverage AI in their work.",
       },
       {
         title: "Google AI Trainings",
         source: "Google",
         href: "https://grow.google/ai/",
-        desc: "Free AI courses and short modules focused on real-world application. Good for quick upskilling and getting a vocabulary for what tools can (and can’t) do.",
+        desc: "Free AI courses from Google focusing on upskilling using Gemini and getting a vocabulary for what AI tools can (and can’t) do.",
       },
       {
         title: "How Transformer LLMs Work",
         source: "DeepLearning.AI",
         href: "https://www.deeplearning.ai/short-courses/how-transformer-llms-work/",
-        desc: "Accessible explanation of how transformer-based language models are trained and why they behave the way they do. Great for demystifying hallucinations, context limits, and grounding.",
+        desc: "A quick 101 on how Large Language Models, the technical innovation that makes tools like ChatGPT possible, work and function under the surface.",
       },
       {
         title: "Codecademy: Intro to OpenAI GPT API",
@@ -151,44 +115,32 @@ const SECTIONS: Section[] = [
     name: "Articles",
     items: [
       {
-        title: "It’s the great AGI rebrand — Hayden Field",
-        source: "The Verge",
+        title: "It’s the great AGI rebrand",
+        source: "Hayden Field",
         href: "https://www.theverge.com/ai-artificial-intelligence/845890/ai-companies-rebrand-agi-artificial-general-intelligence",
         desc: "Explains why major labs are shifting away from “AGI” language and what they’re emphasizing instead. Useful for decoding marketing terms and evaluating claims more clearly.",
       },
       {
-        title: "The companies making the most money from AI — Josh Dzieza & Hayden Field",
-        source: "The Verge",
+        title: "The companies making the most money from AI",
+        source: "Josh Dzieza & Hayden Field",
         href: "https://www.theverge.com/cs/features/831818/ai-mercor-handshake-scale-surge-staffing-companies",
         desc: "A deep look at the ecosystem of data, labor, and vendors powering frontier AI. Helpful for seeing who benefits first—and what scale actually requires behind the scenes.",
       },
       {
-        title: "It’s their job to keep AI from destroying everything — Hayden Field",
-        source: "The Verge",
+        title: "It’s their job to keep AI from destroying everything",
+        source: "Hayden Field",
         href: "https://www.theverge.com/ai-artificial-intelligence/836335/anthropic-societal-impacts-team-ai-claude-effects",
         desc: "Inside a team focused on societal impacts: persuasion, manipulation, labor displacement, and safety. Good for thinking about AI as a social system, not just a tool.",
       },
       {
-        title: "Introducing study mode — OpenAI",
-        source: "OpenAI",
-        href: "https://openai.com/index/chatgpt-study-mode/",
-        desc: "Overview of a learning-focused ChatGPT experience intended to support step-by-step practice. Useful if you’re designing assignments or studying and want more structure than freeform chat.",
-      },
-      {
-        title: "Introducing deep research — OpenAI",
-        source: "OpenAI",
-        href: "https://openai.com/index/introducing-deep-research/",
-        desc: "Describes an agentic workflow for multi-step research with citations and synthesis. Helpful if you want a repeatable way to explore a topic and track sources in one place.",
-      },
-      {
-        title: "A Teen Was Suicidal. ChatGPT Was the Friend He Confided In. — Kashmir Hill",
-        source: "The New York Times",
+        title: "A Teen Was Suicidal. ChatGPT Was the Friend He Confided In.",
+        source: "Kashmir Hill",
         href: "https://www.nytimes.com/2025/08/26/technology/chatgpt-openai-suicide.html",
         desc: "Reporting on how vulnerable users can be influenced by AI systems in high-stakes moments. A strong reminder to set boundaries, avoid over-trusting outputs, and prioritize human support.",
       },
       {
-        title: "When your AI boyfriend gets you better than your spouse — Noel King",
-        source: "Vox",
+        title: "When your AI boyfriend gets you better than your spouse",
+        source: "Noel King",
         href: "https://www.vox.com/podcasts/471982/chatgpt-boyfriend-love-dating-ai",
         desc: "Explores AI companions and the tradeoffs of “always available” conversational partners. Useful for thinking about attachment, persuasion, and where the line is between comfort and dependency.",
       },
@@ -255,17 +207,23 @@ const SECTIONS: Section[] = [
   {
     name: "Tools",
     items: [
-      {
-        title: "ChatGPT Desktop",
-        source: "OpenAI",
-        href: "https://chatgpt.com/features/desktop/",
-        desc: "Native desktop app experience for ChatGPT, designed for faster switching and daily use. Helpful if you use AI alongside docs, email, lesson planning, or coding workflows.",
+       {
+        title: "Dia Browser",
+        source: "The Browser Company of New York",
+        href: "https://www.diabrowser.com/invite/N1M0E0",
+        desc: "This is my favorite AI application - a browser I use on my laptop. Feel free to use my referral link to join for free.",
       },
       {
         title: "Claude",
         source: "Anthropic",
         href: "https://claude.ai/new",
         desc: "Conversational AI often used for writing, analysis, and longer context tasks. Useful as a second model to compare outputs and reduce single-tool dependence.",
+      },
+       {
+        title: "ChatGPT Desktop App",
+        source: "OpenAI",
+        href: "https://chatgpt.com/features/desktop/",
+        desc: "Test out ChatGPT's desktop app - download for free!",
       },
       {
         title: "Claude Code",
@@ -283,54 +241,37 @@ const SECTIONS: Section[] = [
         title: "Perplexity",
         source: "Perplexity",
         href: "https://www.perplexity.ai/",
-        desc: "AI-powered search that emphasizes sources and citations. Useful for quick research, triangulation, and getting a starting set of links to verify claims.",
-      },
-      {
-        title: "Mistral",
-        source: "Mistral",
-        href: "https://mistral.ai/",
-        desc: "Model provider with both open and commercial offerings. Useful for learning the broader LLM landscape beyond the most common consumer tools.",
+        desc: "AI-powered search that is designed to replace traditional search engines. Useful for quick research and getting a starting set of links to verify claims.",
       },
       {
         title: "Gemini",
         source: "Google",
         href: "https://gemini.google/students/",
-        desc: "Google’s multimodal AI tools aimed at students and everyday tasks. Useful for comparing capabilities across ecosystems, especially if you already use Google Workspace.",
+        desc: "Google's LLM offering: make sure to check out free trials they often run for students, around holidays, or at other times of the year",
       },
       {
         title: "NotebookLM",
         source: "Google",
         href: "https://notebooklm.google/",
-        desc: "Research and note assistant grounded in your uploaded sources. Great for turning a stack of PDFs/notes into summaries, Q&A, and study guides with less hallucination risk.",
+        desc: "Makes podcasts out of whatever sources you want, for free.",
       },
       {
-        title: "Dia Browser",
-        source: "Dia",
-        href: "https://www.diabrowser.com/invite/N1M0E0",
-        desc: "AI-first browser concept designed to help you search, summarize, and act faster. Useful if you live in tabs and want lighter-weight summarization built into browsing.",
+        title: "ChatGPT Study Mode",
+        source: "OpenAI",
+        href: "https://openai.com/index/chatgpt-study-mode/",
+        desc: "This feature from ChatGPT is designed to maximize learning, witholding answers and testing knowledge.",
       },
       {
-        title: "Lovable",
-        source: "Lovable",
-        href: "https://lovable.dev/",
-        desc: "AI-powered app and prototype builder for quick iteration and simple deployments. Useful for turning an idea into a working demo without a full engineering workflow.",
+        title: "Deep Research with ChatGPT",
+        source: "OpenAI",
+        href: "https://openai.com/index/introducing-deep-research/",
+        desc: "Describes an agentic workflow for multi-step research with citations and synthesis. Helpful if you want a repeatable way to explore a topic and track sources in one place.",
       },
       {
         title: "OpenAI Agent Builder Guide",
         source: "OpenAI",
         href: "https://platform.openai.com/docs/guides/agent-builder",
-        desc: "Documentation for building tool-using agents with structured workflows. Useful if you want your AI to do multi-step tasks that involve retrieval, tools, and guardrails.",
-      },
-    ],
-  },
-  {
-    name: "Additional Resources",
-    items: [
-      {
-        title: "openai.com",
-        source: "OpenAI",
-        href: "https://openai.com/",
-        desc: "Official research updates, product announcements, and safety notes from OpenAI. Useful for primary-source reading rather than secondhand summaries.",
+        desc: "101 intro for OpenAI's Agent Builder.",
       },
     ],
   },
@@ -356,24 +297,26 @@ function Pill({ text }: { text: string }) {
 function SectionRail({ name, items }: { name: string; items: Item[] }) {
   const showPills = name !== "Publications";
 
+  // your page buffers are px-6 / sm:px-10 — match them here
+  const LEFT_BUF = "pl-6 sm:pl-10";
+  const BLEED_BOTH = "-mx-6 sm:-mx-10"; // allow content to sit above both buffers
+
   return (
     <section className="mt-12">
       <div className="flex items-baseline justify-between gap-4 mb-4">
         <h2 className="text-[22px] tracking-[-0.01em]">{name}</h2>
       </div>
 
-      {/* rail bleeds over the RIGHT buffer only; left edge stays aligned with header */}
-      <div className="relative z-10 -mr-6 sm:-mr-10">
+      {/* bleed over both buffers, but lock the starting position to header via inner left padding */}
+      <div className={`relative z-10 ${BLEED_BOTH}`}>
         <div
           className={[
             "flex gap-3 overflow-x-auto pb-3",
             "snap-x snap-mandatory",
             "overscroll-x-contain",
             "[-webkit-overflow-scrolling:touch]",
-            // important: NO left padding here, so the first tile starts where the header starts
-            "pl-0",
-            // tiny right padding, so tiles can visually sit over the right buffer
-            "pr-2",
+            LEFT_BUF, // keeps first tile aligned with headers (locked)
+            "pr-2", // minimal right padding; cards can sit over right buffer
           ].join(" ")}
           aria-label={name}
         >
@@ -385,7 +328,6 @@ function SectionRail({ name, items }: { name: string; items: Item[] }) {
               rel="noreferrer"
               className={[
                 "snap-start shrink-0",
-                // tiles black
                 "bg-[#000000] border border-[#232327]",
                 "rounded-[22px] p-4",
                 "w-[196px] sm:w-[220px] lg:w-[240px]",
