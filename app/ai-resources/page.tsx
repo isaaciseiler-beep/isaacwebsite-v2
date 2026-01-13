@@ -355,7 +355,7 @@ export default function AiResourcesPage() {
         </Link>
 
         <h1 className="text-[34px] sm:text-[40px] leading-[1.08] tracking-[-0.02em] m-0">
-          Isaac's AI Resources
+          Isaac&apos;s AI Resources
         </h1>
         <div className="text-[#a1a1aa] text-[16px] sm:text-[17px] leading-[1.55] mt-2">
           Getting the most out of Generative AI
