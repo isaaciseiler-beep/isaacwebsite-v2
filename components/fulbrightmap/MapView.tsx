@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import mapboxgl, { type LngLatLike, type MapMouseEvent } from "mapbox-gl";
 
+import { canDeletePin } from "@/lib/fulbrightmap/storage";
 import type { PendingLocation, Pin } from "@/lib/fulbrightmap/types";
 import PinPopup from "./PinPopup";
 
@@ -15,7 +16,7 @@ const NEW_TAIPEI_BOUNDS: [[number, number], [number, number]] = [
 
 type MarkerEntry = {
   marker: mapboxgl.Marker;
-  root?: Root;
+  element: HTMLButtonElement;
 };
 
 export default function MapView({
@@ -23,24 +24,27 @@ export default function MapView({
   pins,
   selectedPinId,
   highlightedPinId,
-  canAddPin,
   loadingPins,
+  anonymousUserId,
   onMapClick,
   onSelectPin,
+  onDeletePin,
 }: {
   token: string;
   pins: Pin[];
   selectedPinId: string | null;
   highlightedPinId: string | null;
-  canAddPin: boolean;
   loadingPins: boolean;
+  anonymousUserId: string;
   onMapClick: (location: PendingLocation) => void;
   onSelectPin: (pinId: string) => void;
+  onDeletePin: (pinId: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const popupRootRef = useRef<Root | null>(null);
+  const suppressMapClickRef = useRef(false);
   const markerEntriesRef = useRef<MarkerEntry[]>([]);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -65,7 +69,49 @@ export default function MapView({
     map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "bottom-right");
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-left");
 
-    const handleLoad = () => setMapReady(true);
+    const handleLoad = () => {
+      map.addSource("new-taipei-focus", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [121.18, 24.78],
+                [121.72, 24.78],
+                [121.92, 25.08],
+                [121.73, 25.32],
+                [121.28, 25.27],
+                [121.08, 25.02],
+                [121.18, 24.78],
+              ],
+            ],
+          },
+        },
+      });
+      map.addLayer({
+        id: "new-taipei-focus-fill",
+        type: "fill",
+        source: "new-taipei-focus",
+        paint: {
+          "fill-color": "#ffffff",
+          "fill-opacity": 0.1,
+        },
+      });
+      map.addLayer({
+        id: "new-taipei-focus-line",
+        type: "line",
+        source: "new-taipei-focus",
+        paint: {
+          "line-color": "#ffffff",
+          "line-opacity": 0.7,
+          "line-width": 2,
+        },
+      });
+      setMapReady(true);
+    };
     const handleError = () => {
       setMapError("The map could not load. Check that your Mapbox token is valid.");
     };
@@ -80,8 +126,7 @@ export default function MapView({
       popupRootRef.current = null;
       popup?.remove();
       popupRoot?.unmount();
-      markerEntriesRef.current.forEach(({ marker, root }) => {
-        root?.unmount();
+      markerEntriesRef.current.forEach(({ marker }) => {
         marker.remove();
       });
       map.remove();
@@ -94,7 +139,18 @@ export default function MapView({
     if (!map) return;
 
     const handleClick = (event: MapMouseEvent) => {
-      onMapClick({ lat: event.lngLat.lat, lng: event.lngLat.lng });
+      if (suppressMapClickRef.current) {
+        suppressMapClickRef.current = false;
+        return;
+      }
+
+      if (popupRef.current) {
+        popupRef.current.remove();
+        suppressMapClickRef.current = false;
+        return;
+      }
+
+        onMapClick({ lat: event.lngLat.lat, lng: event.lngLat.lng });
     };
 
     map.on("click", handleClick);
@@ -103,7 +159,7 @@ export default function MapView({
     };
   }, [onMapClick]);
 
-  function openPopup(pin: Pin, fly: boolean) {
+  const openPopup = useCallback((pin: Pin, fly: boolean) => {
     const map = mapRef.current;
     if (!map) return;
 
@@ -126,10 +182,19 @@ export default function MapView({
 
     const popupNode = document.createElement("div");
     const root = createRoot(popupNode);
-    root.render(<PinPopup pin={pin} />);
+    root.render(
+      <PinPopup
+        pin={pin}
+        canDelete={canDeletePin(pin, anonymousUserId)}
+        onDelete={() => {
+          popup.remove();
+          onDeletePin(pin.id);
+        }}
+      />,
+    );
 
     const popup = new mapboxgl.Popup({
-      closeButton: false,
+      closeButton: true,
       closeOnClick: true,
       offset: 30,
       maxWidth: "340px",
@@ -140,6 +205,11 @@ export default function MapView({
       .addTo(map);
 
     popup.on("close", () => {
+      suppressMapClickRef.current = true;
+      window.setTimeout(() => {
+        suppressMapClickRef.current = false;
+      }, 120);
+
       if (popupRootRef.current === root) {
         root.unmount();
         popupRootRef.current = null;
@@ -151,14 +221,13 @@ export default function MapView({
 
     popupRootRef.current = root;
     popupRef.current = popup;
-  }
+  }, [anonymousUserId, onDeletePin]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
 
-    markerEntriesRef.current.forEach(({ marker, root }) => {
-      root?.unmount();
+    markerEntriesRef.current.forEach(({ marker }) => {
       marker.remove();
     });
 
@@ -166,11 +235,9 @@ export default function MapView({
       const element = document.createElement("button");
       element.type = "button";
       element.setAttribute("aria-label", `Open ${pin.placeName}`);
-      element.className = [
-        "group relative h-12 w-12 rounded-full border-2 bg-neutral-900 shadow-xl transition",
-        "border-white/95 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-orange-300/60",
-        highlightedPinId === pin.id ? "scale-125 ring-4 ring-orange-300/80" : "",
-      ].join(" ");
+      element.dataset.pinId = pin.id;
+      element.className =
+        "group relative h-12 w-12 rounded-full border-2 border-white/95 bg-neutral-900 shadow-xl transition-transform duration-150 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-white/70";
       element.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.2)), url("${pin.imageUrl}")`;
       element.style.backgroundSize = "cover";
       element.style.backgroundPosition = "center";
@@ -182,8 +249,13 @@ export default function MapView({
 
       const dot = document.createElement("span");
       dot.className =
-        "absolute -right-1 -top-1 h-4 w-4 rounded-full border-2 border-white bg-[#f97316] shadow";
+        "absolute -right-1 -top-1 h-4 w-4 rounded-full border-2 border-white bg-neutral-950 shadow";
       element.appendChild(dot);
+
+      element.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
 
       element.addEventListener("click", (event) => {
         event.preventDefault();
@@ -198,16 +270,26 @@ export default function MapView({
         .setLngLat([pin.lng, pin.lat])
         .addTo(map);
 
-      return { marker };
+      return { marker, element };
     });
-  }, [highlightedPinId, mapReady, onSelectPin, pins]);
+  }, [mapReady, onSelectPin, pins]);
+
+  useEffect(() => {
+    markerEntriesRef.current.forEach(({ element }) => {
+      const isHighlighted = element.dataset.pinId === highlightedPinId;
+      element.classList.toggle("scale-125", isHighlighted);
+      element.classList.toggle("ring-4", isHighlighted);
+      element.classList.toggle("ring-white/80", isHighlighted);
+      element.style.zIndex = isHighlighted ? "10" : "1";
+    });
+  }, [highlightedPinId]);
 
   useEffect(() => {
     if (!selectedPinId || !mapReady) return;
 
     const pin = pins.find((candidate) => candidate.id === selectedPinId);
     if (pin) openPopup(pin, true);
-  }, [mapReady, pins, selectedPinId]);
+  }, [mapReady, openPopup, pins, selectedPinId]);
 
   return (
     <div className="relative h-[100svh] w-full overflow-hidden bg-[#0d1412]">
@@ -218,7 +300,7 @@ export default function MapView({
       {!mapReady || loadingPins || mapError ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-5">
           <div className="max-w-sm rounded-[1.25rem] border border-white/15 bg-neutral-950/70 p-5 text-center text-white shadow-2xl backdrop-blur-xl">
-            <div className="mx-auto h-10 w-10 animate-pulse rounded-full bg-orange-400/80 shadow-lg shadow-orange-900/30" />
+            <div className="mx-auto h-10 w-10 animate-pulse rounded-full bg-white/80 shadow-lg shadow-black/30" />
             <div className="mt-4 text-lg font-semibold">
               {mapError ? "Map setup needs attention" : "Preparing the map"}
             </div>
@@ -229,14 +311,6 @@ export default function MapView({
           </div>
         </div>
       ) : null}
-
-      <div className="pointer-events-none fixed bottom-4 left-4 right-4 z-20 flex justify-center sm:justify-start">
-        <div className="rounded-full border border-white/15 bg-neutral-950/55 px-3 py-2 text-xs text-white/70 shadow-xl backdrop-blur-xl">
-          {canAddPin
-            ? "Click the map to add a favorite spot."
-            : "Browse the map or try a random spot."}
-        </div>
-      </div>
     </div>
   );
 }

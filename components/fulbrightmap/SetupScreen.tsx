@@ -4,10 +4,10 @@ export default function SetupScreen() {
   return (
     <main className="flex min-h-[100svh] items-center justify-center bg-[#101513] px-5 py-10 text-white">
       <section className="w-full max-w-2xl overflow-hidden rounded-[1.5rem] border border-white/15 bg-white/[0.06] shadow-2xl backdrop-blur-xl">
-        <div className="h-44 bg-[radial-gradient(circle_at_30%_20%,rgba(249,115,22,0.35),transparent_34%),linear-gradient(135deg,#1f4037,#101513_58%,#0b0f0e)] p-6">
+        <div className="h-44 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_34%),linear-gradient(135deg,#2a2a2a,#101010_58%,#050505)] p-6">
           <div className="flex h-full items-end justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-orange-100">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
                 <MapPinned aria-hidden="true" className="h-3.5 w-3.5" />
                 Fulbright Map
               </div>
@@ -15,7 +15,7 @@ export default function SetupScreen() {
                 Add a Mapbox token to launch the map
               </h1>
             </div>
-            <KeyRound aria-hidden="true" className="hidden h-12 w-12 text-orange-200 sm:block" />
+            <KeyRound aria-hidden="true" className="hidden h-12 w-12 text-white/80 sm:block" />
           </div>
         </div>
 
@@ -26,7 +26,7 @@ export default function SetupScreen() {
             `.env.local`, then restart the dev server.
           </p>
 
-          <div className="rounded-2xl border border-white/10 bg-black/35 p-4 font-mono text-sm text-orange-100">
+          <div className="rounded-2xl border border-white/10 bg-black/35 p-4 font-mono text-sm text-white/85">
             NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=pk_your_token_here
           </div>
 

@@ -3,8 +3,8 @@
 ## Fulbright Map
 
 The unlinked map page lives at `/fulbrightmap`. It is a Next.js App Router page
-for sharing favorite spots in New Taipei with Mapbox markers, image uploads, a
-three-pin anonymous user limit, and a random spot picker.
+for sharing favorite spots in New Taipei with Mapbox markers, image uploads,
+anonymous local identity, and a random spot picker.
 
 ### Run locally
 
@@ -52,4 +52,4 @@ inside browser `localStorage`.
 - Public anonymous posting is intentional for this unlinked community map.
 - Supabase storage uses a public bucket so popups can render images directly.
 - Each browser gets one anonymous user id stored in `localStorage`, and that id
-  can add up to three pins.
+  is used to show delete controls for pins created in that browser.

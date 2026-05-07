@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import AddPinForm, {
   type AddPinFormValues,
@@ -11,6 +11,7 @@ import Toast, { type ToastMessage } from "@/components/fulbrightmap/Toast";
 import TopPanel from "@/components/fulbrightmap/TopPanel";
 import {
   createPin,
+  deletePin,
   getPins,
   getStorageMode,
   uploadImage,
@@ -32,11 +33,6 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
   const toastIdRef = useRef(0);
 
   const storageMode = getStorageMode();
-  const userPinCount = useMemo(
-    () => pins.filter((pin) => pin.anonymousUserId === anonymousUserId).length,
-    [anonymousUserId, pins],
-  );
-  const canAddPin = userPinCount < 3;
 
   const showToast = useCallback(
     (message: Omit<ToastMessage, "id">) => {
@@ -79,32 +75,13 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
 
   const handleMapClick = useCallback(
     (location: PendingLocation) => {
-      if (!canAddPin) {
-        showToast({
-          tone: "info",
-          title: "You have added your three favorite spots.",
-          detail: "You can still explore everyone else's pins.",
-        });
-        return;
-      }
-
       setPendingLocation(location);
     },
-    [canAddPin, showToast],
+    [],
   );
 
   async function handleSubmit(values: AddPinFormValues) {
     if (!pendingLocation || !values.image) return;
-
-    if (!canAddPin) {
-      showToast({
-        tone: "info",
-        title: "Three spots already added",
-        detail: "Thanks for sharing your favorites.",
-      });
-      setPendingLocation(null);
-      return;
-    }
 
     setSubmitting(true);
 
@@ -143,12 +120,35 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
     }
   }
 
+  async function handleDeletePin(pinId: string) {
+    const pin = pins.find((candidate) => candidate.id === pinId);
+    if (!pin) return;
+
+    try {
+      await deletePin(pinId, anonymousUserId);
+      setPins((current) => current.filter((candidate) => candidate.id !== pinId));
+      setSelectedPinId((current) => (current === pinId ? null : current));
+      setHighlightedPinId((current) => (current === pinId ? null : current));
+      showToast({
+        tone: "success",
+        title: "Spot deleted",
+        detail: `${pin.placeName} was removed from the map.`,
+      });
+    } catch (error) {
+      showToast({
+        tone: "error",
+        title: "Could not delete this spot",
+        detail: error instanceof Error ? error.message : "Please try again.",
+      });
+    }
+  }
+
   function chooseRandomSpot() {
     if (pins.length === 0) {
       showToast({
         tone: "info",
         title: "No spots yet",
-        detail: "Click the map to add the first favorite place.",
+        detail: "Add the first favorite place whenever you're ready.",
       });
       return;
     }
@@ -169,14 +169,14 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
         pins={pins}
         selectedPinId={selectedPinId}
         highlightedPinId={highlightedPinId}
-        canAddPin={canAddPin}
         loadingPins={loadingPins}
+        anonymousUserId={anonymousUserId}
         onMapClick={handleMapClick}
         onSelectPin={setSelectedPinId}
+        onDeletePin={handleDeletePin}
       />
 
       <TopPanel
-        userPinCount={userPinCount}
         totalPins={pins.length}
         storageMode={storageMode}
         loading={loadingPins}

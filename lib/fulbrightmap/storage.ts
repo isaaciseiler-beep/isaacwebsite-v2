@@ -4,6 +4,7 @@ import { compressImage, compressImageToDataUrl } from "./image";
 import type { Pin, PinInput, StorageMode } from "./types";
 
 const LOCAL_PINS_KEY = "fulbrightmap.pins";
+const LOCAL_DELETE_TOKENS_KEY = "fulbrightmap.deleteTokens";
 const SUPABASE_IMAGE_BUCKET = "fulbrightmap-pin-images";
 
 let supabaseClient: SupabaseClient | null = null;
@@ -64,6 +65,54 @@ function toDatabase(input: PinInput) {
   };
 }
 
+function readLocalDeleteTokens() {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const raw = window.localStorage.getItem(LOCAL_DELETE_TOKENS_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeLocalDeleteTokens(tokens: Record<string, string>) {
+  window.localStorage.setItem(LOCAL_DELETE_TOKENS_KEY, JSON.stringify(tokens));
+}
+
+function rememberDeleteToken(pinId: string, token: string) {
+  writeLocalDeleteTokens({
+    ...readLocalDeleteTokens(),
+    [pinId]: token,
+  });
+}
+
+function forgetDeleteToken(pinId: string) {
+  const tokens = readLocalDeleteTokens();
+  delete tokens[pinId];
+  writeLocalDeleteTokens(tokens);
+}
+
+function getDeleteToken(pinId: string) {
+  return readLocalDeleteTokens()[pinId] ?? null;
+}
+
+function makeDeleteToken() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `delete_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+async function sha256Hex(input: string) {
+  const data = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function readLocalPins() {
   if (typeof window === "undefined") return [];
 
@@ -81,6 +130,14 @@ function writeLocalPins(pins: Pin[]) {
 
 export function getStorageMode(): StorageMode {
   return hasSupabaseConfig() ? "supabase" : "local";
+}
+
+export function canDeletePin(pin: Pin, anonymousUserId: string) {
+  if (getStorageMode() === "local") {
+    return pin.anonymousUserId === anonymousUserId;
+  }
+
+  return Boolean(getDeleteToken(pin.id));
 }
 
 export async function getPins(): Promise<Pin[]> {
@@ -139,14 +196,53 @@ export async function createPin(input: PinInput): Promise<Pin> {
     return pin;
   }
 
+  const deleteToken = makeDeleteToken();
+  const deleteTokenHash = await sha256Hex(deleteToken);
+
   const { data, error } = await supabase
     .from("pins")
-    .insert(toDatabase(input))
+    .insert({
+      ...toDatabase(input),
+      delete_token_hash: deleteTokenHash,
+    })
     .select(
       "id, lat, lng, author_name, place_name, caption, image_url, anonymous_user_id, created_at",
     )
     .single();
 
   if (error) throw new Error(error.message);
-  return fromDatabase(data);
+  const pin = fromDatabase(data);
+  rememberDeleteToken(pin.id, deleteToken);
+  return pin;
+}
+
+export async function deletePin(id: string, anonymousUserId: string) {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    writeLocalPins(
+      readLocalPins().filter(
+        (pin) => pin.id !== id || pin.anonymousUserId !== anonymousUserId,
+      ),
+    );
+    forgetDeleteToken(id);
+    return;
+  }
+
+  const deleteToken = getDeleteToken(id);
+  if (!deleteToken) {
+    throw new Error("This spot can only be deleted from the browser that created it.");
+  }
+
+  const { data, error } = await supabase.rpc("delete_pin", {
+    pin_id: id,
+    delete_token: deleteToken,
+  });
+
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new Error("This spot could not be deleted. It may have already been removed.");
+  }
+
+  forgetDeleteToken(id);
 }

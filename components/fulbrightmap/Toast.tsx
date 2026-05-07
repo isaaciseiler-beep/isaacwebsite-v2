@@ -14,8 +14,8 @@ const ICONS = {
 };
 
 const TONES = {
-  success: "border-emerald-300/40 bg-emerald-950/70 text-emerald-50",
-  error: "border-rose-300/40 bg-rose-950/75 text-rose-50",
+  success: "border-white/20 bg-neutral-950/80 text-white",
+  error: "border-white/20 bg-neutral-950/80 text-white",
   info: "border-white/20 bg-neutral-950/75 text-white",
 };
 

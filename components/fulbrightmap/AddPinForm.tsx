@@ -9,6 +9,8 @@ import {
 } from "@/lib/fulbrightmap/image";
 import type { PendingLocation } from "@/lib/fulbrightmap/types";
 
+const CAPTION_LIMIT = 200;
+
 export type AddPinFormValues = {
   authorName: string;
   placeName: string;
@@ -96,8 +98,8 @@ export default function AddPinForm({
     if (!values.authorName.trim()) nextErrors.authorName = "Your name is required.";
     if (!values.placeName.trim()) nextErrors.placeName = "Place name is required.";
     if (!values.caption.trim()) nextErrors.caption = "Caption is required.";
-    if (values.caption.trim().length > 180) {
-      nextErrors.caption = "Keep the caption to 180 characters or fewer.";
+    if (values.caption.trim().length > CAPTION_LIMIT) {
+      nextErrors.caption = `Keep the caption to ${CAPTION_LIMIT} characters or fewer.`;
     }
     if (!values.image) nextErrors.image = "A place image is required.";
 
@@ -129,7 +131,7 @@ export default function AddPinForm({
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-orange-200/80">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/65">
               <MapPin aria-hidden="true" className="h-3.5 w-3.5" />
               {coordinateLabel}
             </div>
@@ -154,7 +156,7 @@ export default function AddPinForm({
             <input
               value={values.authorName}
               onChange={(event) => updateField("authorName", event.target.value)}
-              className="mt-2 h-11 w-full rounded-2xl border border-white/15 bg-white/10 px-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+              className="mt-2 h-11 w-full rounded-2xl border border-white/15 bg-white/10 px-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-white focus:ring-2 focus:ring-white/25"
               placeholder="Isaac"
               disabled={submitting}
             />
@@ -168,7 +170,7 @@ export default function AddPinForm({
             <input
               value={values.placeName}
               onChange={(event) => updateField("placeName", event.target.value)}
-              className="mt-2 h-11 w-full rounded-2xl border border-white/15 bg-white/10 px-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+              className="mt-2 h-11 w-full rounded-2xl border border-white/15 bg-white/10 px-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-white focus:ring-2 focus:ring-white/25"
               placeholder="Tamsui riverside at sunset"
               disabled={submitting}
             />
@@ -180,14 +182,16 @@ export default function AddPinForm({
           <label className="block">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-medium text-white/85">Brief caption</span>
-              <span className="text-xs text-white/45">{values.caption.length}/180</span>
+              <span className="text-xs text-white/45">
+                {values.caption.length}/{CAPTION_LIMIT}
+              </span>
             </div>
             <textarea
               value={values.caption}
               onChange={(event) => updateField("caption", event.target.value)}
-              maxLength={220}
+              maxLength={CAPTION_LIMIT}
               rows={4}
-              className="mt-2 w-full resize-none rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm leading-5 text-white outline-none transition placeholder:text-white/35 focus:border-orange-300 focus:ring-2 focus:ring-orange-300/30"
+              className="mt-2 w-full resize-none rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm leading-5 text-white outline-none transition placeholder:text-white/35 focus:border-white focus:ring-2 focus:ring-white/25"
               placeholder="What makes this place worth discovering?"
               disabled={submitting}
             />
@@ -199,7 +203,7 @@ export default function AddPinForm({
           <div>
             <label className="block">
               <span className="text-sm font-medium text-white/85">Place image</span>
-              <span className="mt-2 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 bg-white/10 p-4 text-center transition hover:border-orange-300/70 hover:bg-white/15">
+              <span className="mt-2 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 bg-white/10 p-4 text-center transition hover:border-white/70 hover:bg-white/15">
                 {previewUrl ? (
                   <img
                     src={previewUrl}
@@ -208,7 +212,7 @@ export default function AddPinForm({
                   />
                 ) : (
                   <>
-                    <Camera aria-hidden="true" className="h-8 w-8 text-orange-200" />
+                    <Camera aria-hidden="true" className="h-8 w-8 text-white/80" />
                     <span className="mt-2 text-sm font-medium">Upload a photo</span>
                     <span className="mt-1 text-xs text-white/45">
                       JPG, PNG, WebP, or GIF. Up to 5MB.
@@ -242,7 +246,7 @@ export default function AddPinForm({
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#f97316] px-5 text-sm font-semibold text-white shadow-lg shadow-orange-950/30 transition hover:bg-[#fb923c] focus:outline-none focus:ring-2 focus:ring-white/80 disabled:cursor-wait disabled:bg-white/15 disabled:text-white/55 disabled:shadow-none"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 shadow-lg shadow-black/25 transition hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-white/80 disabled:cursor-wait disabled:bg-white/15 disabled:text-white/55 disabled:shadow-none"
           >
             {submitting ? (
               <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />

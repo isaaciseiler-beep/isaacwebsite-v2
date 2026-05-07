@@ -1,16 +1,14 @@
-import { Database, HardDrive, MapPin } from "lucide-react";
+import { Database, HardDrive } from "lucide-react";
 
 import type { StorageMode } from "@/lib/fulbrightmap/types";
 import RandomSpotButton from "./RandomSpotButton";
 
 export default function TopPanel({
-  userPinCount,
   totalPins,
   storageMode,
   loading,
   onRandomSpot,
 }: {
-  userPinCount: number;
   totalPins: number;
   storageMode: StorageMode;
   loading: boolean;
@@ -25,32 +23,22 @@ export default function TopPanel({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-orange-100/75">
-            <MapPin aria-hidden="true" className="h-3.5 w-3.5" />
-            New Taipei
-          </div>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-            Favorite Spots
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            New Taipei Cohort&apos;s Favorite Spots
           </h1>
-          <p className="mt-1 max-w-[32ch] text-sm leading-5 text-white/70">
-            Drop up to three pins and share places worth discovering.
-          </p>
         </div>
         <div className="rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-center">
           <div className="text-lg font-semibold leading-none">
-            {userPinCount}/3
+            {totalPins}
           </div>
           <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-white/55">
-            added
+            spots
           </div>
         </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <RandomSpotButton disabled={loading} onClick={onRandomSpot} />
-        <span className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs text-white/75">
-          {loading ? "Loading spots" : `${totalPins} shared spot${totalPins === 1 ? "" : "s"}`}
-        </span>
         <span
           className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs text-white/75"
           title={
@@ -63,12 +51,6 @@ export default function TopPanel({
           {storageMode === "local" ? "Local browser mode" : "Shared mode"}
         </span>
       </div>
-
-      {userPinCount >= 3 ? (
-        <div className="mt-3 rounded-2xl border border-emerald-200/20 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-50">
-          You&apos;ve added your three favorite spots.
-        </div>
-      ) : null}
     </section>
   );
 }

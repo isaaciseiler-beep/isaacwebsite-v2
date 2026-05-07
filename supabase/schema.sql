@@ -10,14 +10,22 @@ create table if not exists public.pins (
   lng double precision not null,
   author_name text not null check (char_length(author_name) between 1 and 120),
   place_name text not null check (char_length(place_name) between 1 and 160),
-  caption text not null check (char_length(caption) between 1 and 180),
+  caption text not null check (char_length(caption) between 1 and 200),
   image_url text not null,
   anonymous_user_id text not null,
+  delete_token_hash text,
   created_at timestamptz not null default now()
 );
 
 create index if not exists pins_created_at_idx on public.pins (created_at desc);
 create index if not exists pins_anonymous_user_id_idx on public.pins (anonymous_user_id);
+
+alter table public.pins drop constraint if exists pins_caption_check;
+alter table public.pins
+  add constraint pins_caption_check
+  check (char_length(caption) between 1 and 200);
+
+alter table public.pins add column if not exists delete_token_hash text;
 
 alter table public.pins enable row level security;
 
@@ -31,8 +39,31 @@ create policy "Anonymous visitors can create pins"
   on public.pins for insert
   with check (
     anonymous_user_id is not null
-    and char_length(caption) <= 180
+    and char_length(caption) <= 200
+    and delete_token_hash is not null
   );
+
+drop policy if exists "Anonymous visitors can delete pins" on public.pins;
+
+create or replace function public.delete_pin(pin_id uuid, delete_token text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted_count integer;
+begin
+  delete from public.pins
+  where id = pin_id
+    and delete_token_hash = encode(digest(delete_token, 'sha256'), 'hex');
+
+  get diagnostics deleted_count = row_count;
+  return deleted_count > 0;
+end;
+$$;
+
+grant execute on function public.delete_pin(uuid, text) to anon, authenticated;
 
 -- Storage setup:
 -- 1. In Supabase Dashboard > Storage, create a bucket named
