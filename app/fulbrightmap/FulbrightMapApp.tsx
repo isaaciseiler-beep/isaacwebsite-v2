@@ -18,9 +18,7 @@ import {
 import type { PendingLocation, Pin } from "@/lib/fulbrightmap/types";
 import { getAnonymousUserId } from "@/lib/fulbrightmap/user";
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? "";
-
-export default function FulbrightMapApp() {
+export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }) {
   const [anonymousUserId, setAnonymousUserId] = useState("");
   const [pins, setPins] = useState<Pin[]>([]);
   const [pendingLocation, setPendingLocation] = useState<PendingLocation | null>(
@@ -162,12 +160,12 @@ export default function FulbrightMapApp() {
     window.setTimeout(() => setHighlightedPinId(null), 1800);
   }
 
-  if (!MAPBOX_TOKEN) return <SetupScreen />;
+  if (!mapboxToken) return <SetupScreen />;
 
   return (
     <main className="relative min-h-[100svh] overflow-hidden bg-neutral-950">
       <MapView
-        token={MAPBOX_TOKEN}
+        token={mapboxToken}
         pins={pins}
         selectedPinId={selectedPinId}
         highlightedPinId={highlightedPinId}

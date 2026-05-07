@@ -20,7 +20,7 @@ Open `http://localhost:3000/fulbrightmap`.
 Create `.env.local` and add:
 
 ```bash
-NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=pk_your_token_here
+MAPBOX_ACCESS_TOKEN=pk_your_token_here
 ```
 
 The app shows a setup screen instead of crashing if this value is missing.

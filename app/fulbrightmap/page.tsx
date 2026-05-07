@@ -15,5 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default function FulbrightMapPage() {
-  return <FulbrightMapApp />;
+  const mapboxToken =
+    process.env.MAPBOX_ACCESS_TOKEN ??
+    process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ??
+    "";
+
+  return <FulbrightMapApp mapboxToken={mapboxToken} />;
 }
