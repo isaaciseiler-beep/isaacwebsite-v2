@@ -19,6 +19,10 @@ type MarkerEntry = {
   element: HTMLButtonElement;
 };
 
+function stopMarkerEvent(event: Event) {
+  event.stopPropagation();
+}
+
 export default function MapView({
   token,
   pins,
@@ -70,46 +74,6 @@ export default function MapView({
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-left");
 
     const handleLoad = () => {
-      map.addSource("new-taipei-focus", {
-        type: "geojson",
-        data: {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Polygon",
-            coordinates: [
-              [
-                [121.18, 24.78],
-                [121.72, 24.78],
-                [121.92, 25.08],
-                [121.73, 25.32],
-                [121.28, 25.27],
-                [121.08, 25.02],
-                [121.18, 24.78],
-              ],
-            ],
-          },
-        },
-      });
-      map.addLayer({
-        id: "new-taipei-focus-fill",
-        type: "fill",
-        source: "new-taipei-focus",
-        paint: {
-          "fill-color": "#ffffff",
-          "fill-opacity": 0.1,
-        },
-      });
-      map.addLayer({
-        id: "new-taipei-focus-line",
-        type: "line",
-        source: "new-taipei-focus",
-        paint: {
-          "line-color": "#ffffff",
-          "line-opacity": 0.7,
-          "line-width": 2,
-        },
-      });
       setMapReady(true);
     };
     const handleError = () => {
@@ -149,8 +113,7 @@ export default function MapView({
         suppressMapClickRef.current = false;
         return;
       }
-
-        onMapClick({ lat: event.lngLat.lat, lng: event.lngLat.lng });
+      onMapClick({ lat: event.lngLat.lat, lng: event.lngLat.lng });
     };
 
     map.on("click", handleClick);
@@ -237,7 +200,7 @@ export default function MapView({
       element.setAttribute("aria-label", `Open ${pin.placeName}`);
       element.dataset.pinId = pin.id;
       element.className =
-        "group relative h-12 w-12 rounded-full border-2 border-white/95 bg-neutral-900 shadow-xl transition-transform duration-150 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-white/70";
+        "group relative h-12 w-12 rounded-full border-2 border-white/95 bg-neutral-900 shadow-xl hover:border-white focus:outline-none focus:ring-4 focus:ring-white/70";
       element.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.2)), url("${pin.imageUrl}")`;
       element.style.backgroundSize = "cover";
       element.style.backgroundPosition = "center";
@@ -252,34 +215,39 @@ export default function MapView({
         "absolute -right-1 -top-1 h-4 w-4 rounded-full border-2 border-white bg-neutral-950 shadow";
       element.appendChild(dot);
 
-      element.addEventListener("pointerdown", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      });
+      element.addEventListener("pointerdown", stopMarkerEvent);
+      element.addEventListener("mousedown", stopMarkerEvent);
+      element.addEventListener("touchstart", stopMarkerEvent, { passive: true });
 
       element.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
+        suppressMapClickRef.current = true;
+        openPopup(pin, false);
         onSelectPin(pin.id);
+        window.setTimeout(() => {
+          suppressMapClickRef.current = false;
+        }, 120);
       });
 
       const marker = new mapboxgl.Marker({
         element,
         anchor: "bottom",
+        clickTolerance: 8,
       })
         .setLngLat([pin.lng, pin.lat])
         .addTo(map);
 
       return { marker, element };
     });
-  }, [mapReady, onSelectPin, pins]);
+  }, [mapReady, onSelectPin, openPopup, pins]);
 
   useEffect(() => {
     markerEntriesRef.current.forEach(({ element }) => {
       const isHighlighted = element.dataset.pinId === highlightedPinId;
-      element.classList.toggle("scale-125", isHighlighted);
       element.classList.toggle("ring-4", isHighlighted);
       element.classList.toggle("ring-white/80", isHighlighted);
+      element.classList.toggle("shadow-2xl", isHighlighted);
       element.style.zIndex = isHighlighted ? "10" : "1";
     });
   }, [highlightedPinId]);
