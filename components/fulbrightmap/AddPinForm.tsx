@@ -157,7 +157,7 @@ export default function AddPinForm({
               value={values.authorName}
               onChange={(event) => updateField("authorName", event.target.value)}
               className="mt-2 h-11 w-full rounded-2xl border border-white/15 bg-white/10 px-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-white focus:ring-2 focus:ring-white/25"
-              placeholder="Isaac"
+              placeholder="Mina"
               disabled={submitting}
             />
             {errors.authorName ? (

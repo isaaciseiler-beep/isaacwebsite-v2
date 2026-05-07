@@ -25,10 +25,10 @@ MAPBOX_ACCESS_TOKEN=pk_your_token_here
 
 The app shows a setup screen instead of crashing if this value is missing.
 
-### Optional Supabase shared persistence
+### Supabase shared persistence
 
 Without Supabase, pins are saved in `localStorage` and only exist in the current
-browser. To enable shared pins for all visitors, add both values:
+browser. For the collaborative live map, add both values in Vercel:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -38,6 +38,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_key
 Then run `supabase/schema.sql` in the Supabase SQL editor. The schema creates
 the `pins` table, row-level security policies, and guidance/policies for a
 public storage bucket named `fulbrightmap-pin-images`.
+
+In Supabase mode, each submitted pin is inserted into the shared `pins` table,
+so new visitors load the same shared set of spots. Open clients also refresh
+the pin list periodically.
 
 ### Image uploads
 

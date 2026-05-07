@@ -25,12 +25,17 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
   const [pendingLocation, setPendingLocation] = useState<PendingLocation | null>(
     null,
   );
-  const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  const [popupRequest, setPopupRequest] = useState<{
+    pinId: string;
+    fly: boolean;
+    nonce: number;
+  } | null>(null);
   const [highlightedPinId, setHighlightedPinId] = useState<string | null>(null);
   const [loadingPins, setLoadingPins] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const toastIdRef = useRef(0);
+  const popupRequestNonceRef = useRef(0);
 
   const storageMode = getStorageMode();
 
@@ -51,27 +56,37 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
     setAnonymousUserId(userId);
 
     let active = true;
-    getPins()
-      .then((nextPins) => {
+    async function loadPins(showError: boolean) {
+      try {
+        const nextPins = await getPins();
         if (!active) return;
         setPins(nextPins);
-      })
-      .catch((error) => {
-        if (!active) return;
+      } catch (error) {
+        if (!active || !showError) return;
         showToast({
           tone: "error",
           title: "Could not load spots",
           detail: error instanceof Error ? error.message : "Please try again.",
         });
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoadingPins(false);
-      });
+      }
+    }
+
+    void loadPins(true);
+
+    const refreshInterval =
+      storageMode === "supabase"
+        ? window.setInterval(() => {
+            void loadPins(false);
+          }, 15000)
+        : null;
 
     return () => {
       active = false;
+      if (refreshInterval) window.clearInterval(refreshInterval);
     };
-  }, [showToast]);
+  }, [showToast, storageMode]);
 
   const handleMapClick = useCallback(
     (location: PendingLocation) => {
@@ -98,7 +113,12 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
 
       setPins((current) => [pin, ...current]);
       setPendingLocation(null);
-      setSelectedPinId(pin.id);
+      popupRequestNonceRef.current += 1;
+      setPopupRequest({
+        pinId: pin.id,
+        fly: false,
+        nonce: popupRequestNonceRef.current,
+      });
       setHighlightedPinId(pin.id);
       window.setTimeout(() => setHighlightedPinId(null), 1800);
       showToast({
@@ -127,7 +147,9 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
     try {
       await deletePin(pinId, anonymousUserId);
       setPins((current) => current.filter((candidate) => candidate.id !== pinId));
-      setSelectedPinId((current) => (current === pinId ? null : current));
+      setPopupRequest((current) =>
+        current?.pinId === pinId ? null : current,
+      );
       setHighlightedPinId((current) => (current === pinId ? null : current));
       showToast({
         tone: "success",
@@ -154,8 +176,12 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
     }
 
     const pin = pins[Math.floor(Math.random() * pins.length)];
-    setSelectedPinId(null);
-    window.setTimeout(() => setSelectedPinId(pin.id), 0);
+    popupRequestNonceRef.current += 1;
+    setPopupRequest({
+      pinId: pin.id,
+      fly: true,
+      nonce: popupRequestNonceRef.current,
+    });
     setHighlightedPinId(pin.id);
     window.setTimeout(() => setHighlightedPinId(null), 1800);
   }
@@ -167,12 +193,11 @@ export default function FulbrightMapApp({ mapboxToken }: { mapboxToken: string }
       <MapView
         token={mapboxToken}
         pins={pins}
-        selectedPinId={selectedPinId}
+        popupRequest={popupRequest}
         highlightedPinId={highlightedPinId}
         loadingPins={loadingPins}
         anonymousUserId={anonymousUserId}
         onMapClick={handleMapClick}
-        onSelectPin={setSelectedPinId}
         onDeletePin={handleDeletePin}
       />
 

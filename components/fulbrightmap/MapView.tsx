@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { X } from "lucide-react";
 import mapboxgl, { type LngLatLike, type MapMouseEvent } from "mapbox-gl";
 
 import { canDeletePin } from "@/lib/fulbrightmap/storage";
@@ -16,7 +16,8 @@ const NEW_TAIPEI_BOUNDS: [[number, number], [number, number]] = [
 
 type MarkerEntry = {
   marker: mapboxgl.Marker;
-  element: HTMLButtonElement;
+  root: HTMLDivElement;
+  button: HTMLButtonElement;
 };
 
 function stopMarkerEvent(event: Event) {
@@ -26,36 +27,36 @@ function stopMarkerEvent(event: Event) {
 export default function MapView({
   token,
   pins,
-  selectedPinId,
+  popupRequest,
   highlightedPinId,
   loadingPins,
   anonymousUserId,
   onMapClick,
-  onSelectPin,
   onDeletePin,
 }: {
   token: string;
   pins: Pin[];
-  selectedPinId: string | null;
+  popupRequest: { pinId: string; fly: boolean; nonce: number } | null;
   highlightedPinId: string | null;
   loadingPins: boolean;
   anonymousUserId: string;
   onMapClick: (location: PendingLocation) => void;
-  onSelectPin: (pinId: string) => void;
   onDeletePin: (pinId: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const popupRef = useRef<mapboxgl.Popup | null>(null);
-  const popupRootRef = useRef<Root | null>(null);
   const suppressMapClickRef = useRef(false);
-  const markerEntriesRef = useRef<MarkerEntry[]>([]);
+  const markerEntriesRef = useRef<Map<string, MarkerEntry>>(new Map());
+  const pinsRef = useRef<Pin[]>(pins);
+  const activePinRef = useRef<Pin | null>(null);
+  const [activePin, setActivePin] = useState<Pin | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    const markerEntries = markerEntriesRef.current;
     mapboxgl.accessToken = token;
 
     const map = new mapboxgl.Map({
@@ -84,19 +85,29 @@ export default function MapView({
     map.on("error", handleError);
 
     return () => {
-      const popup = popupRef.current;
-      const popupRoot = popupRootRef.current;
-      popupRef.current = null;
-      popupRootRef.current = null;
-      popup?.remove();
-      popupRoot?.unmount();
-      markerEntriesRef.current.forEach(({ marker }) => {
+      markerEntries.forEach(({ marker }) => {
         marker.remove();
       });
+      markerEntries.clear();
       map.remove();
       mapRef.current = null;
     };
   }, [token]);
+
+  useEffect(() => {
+    pinsRef.current = pins;
+  }, [pins]);
+
+  useEffect(() => {
+    activePinRef.current = activePin;
+  }, [activePin]);
+
+  useEffect(() => {
+    if (!activePin) return;
+    if (!pins.some((pin) => pin.id === activePin.id)) {
+      setActivePin(null);
+    }
+  }, [activePin, pins]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -108,8 +119,8 @@ export default function MapView({
         return;
       }
 
-      if (popupRef.current) {
-        popupRef.current.remove();
+      if (activePinRef.current) {
+        setActivePin(null);
         suppressMapClickRef.current = false;
         return;
       }
@@ -126,13 +137,6 @@ export default function MapView({
     const map = mapRef.current;
     if (!map) return;
 
-    const previousPopup = popupRef.current;
-    const previousRoot = popupRootRef.current;
-    popupRef.current = null;
-    popupRootRef.current = null;
-    previousPopup?.remove();
-    previousRoot?.unmount();
-
     if (fly) {
       map.flyTo({
         center: [pin.lng, pin.lat],
@@ -143,121 +147,104 @@ export default function MapView({
       });
     }
 
-    const popupNode = document.createElement("div");
-    const root = createRoot(popupNode);
-    root.render(
-      <PinPopup
-        pin={pin}
-        canDelete={canDeletePin(pin, anonymousUserId)}
-        onDelete={() => {
-          popup.remove();
-          onDeletePin(pin.id);
-        }}
-      />,
-    );
+    setActivePin(pin);
+  }, []);
 
-    const popup = new mapboxgl.Popup({
-      closeButton: true,
-      closeOnClick: true,
-      offset: 30,
-      maxWidth: "340px",
-      className: "fulbright-pin-popup",
-    })
-      .setLngLat([pin.lng, pin.lat])
-      .setDOMContent(popupNode)
-      .addTo(map);
+  const openPopupRef = useRef(openPopup);
 
-    popup.on("close", () => {
-      suppressMapClickRef.current = true;
-      window.setTimeout(() => {
-        suppressMapClickRef.current = false;
-      }, 120);
-
-      if (popupRootRef.current === root) {
-        root.unmount();
-        popupRootRef.current = null;
-      }
-      if (popupRef.current === popup) {
-        popupRef.current = null;
-      }
-    });
-
-    popupRootRef.current = root;
-    popupRef.current = popup;
-  }, [anonymousUserId, onDeletePin]);
+  useEffect(() => {
+    openPopupRef.current = openPopup;
+  }, [openPopup]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
 
-    markerEntriesRef.current.forEach(({ marker }) => {
-      marker.remove();
+    const entries = markerEntriesRef.current;
+    const nextPinIds = new Set(pins.map((pin) => pin.id));
+
+    entries.forEach(({ marker }, pinId) => {
+      if (!nextPinIds.has(pinId)) {
+        marker.remove();
+        entries.delete(pinId);
+      }
     });
 
-    markerEntriesRef.current = pins.map((pin) => {
-      const element = document.createElement("button");
-      element.type = "button";
-      element.setAttribute("aria-label", `Open ${pin.placeName}`);
-      element.dataset.pinId = pin.id;
-      element.className =
+    pins.forEach((pin) => {
+      if (entries.has(pin.id)) return;
+
+      const root = document.createElement("div");
+      root.dataset.pinId = pin.id;
+      root.className = "relative h-0 w-0";
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-label", `Open ${pin.placeName}`);
+      button.className =
         "group relative h-12 w-12 rounded-full border-2 border-white/95 bg-neutral-900 shadow-xl hover:border-white focus:outline-none focus:ring-4 focus:ring-white/70";
-      element.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.2)), url("${pin.imageUrl}")`;
-      element.style.backgroundSize = "cover";
-      element.style.backgroundPosition = "center";
+      button.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.2)), url("${pin.imageUrl}")`;
+      button.style.backgroundSize = "cover";
+      button.style.backgroundPosition = "center";
+      button.style.left = "-24px";
+      button.style.position = "absolute";
+      button.style.top = "-60px";
 
       const tail = document.createElement("span");
       tail.className =
         "absolute -bottom-1 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 rounded-[4px] border-b-2 border-r-2 border-white/95 bg-inherit";
-      element.appendChild(tail);
+      button.appendChild(tail);
 
       const dot = document.createElement("span");
       dot.className =
         "absolute -right-1 -top-1 h-4 w-4 rounded-full border-2 border-white bg-neutral-950 shadow";
-      element.appendChild(dot);
+      button.appendChild(dot);
 
-      element.addEventListener("pointerdown", stopMarkerEvent);
-      element.addEventListener("mousedown", stopMarkerEvent);
-      element.addEventListener("touchstart", stopMarkerEvent, { passive: true });
+      button.addEventListener("pointerdown", stopMarkerEvent);
+      button.addEventListener("mousedown", stopMarkerEvent);
+      button.addEventListener("touchstart", stopMarkerEvent, { passive: true });
 
-      element.addEventListener("click", (event) => {
+      button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
         suppressMapClickRef.current = true;
-        openPopup(pin, false);
-        onSelectPin(pin.id);
+        openPopupRef.current(pin, false);
         window.setTimeout(() => {
           suppressMapClickRef.current = false;
         }, 120);
       });
 
+      root.appendChild(button);
+
       const marker = new mapboxgl.Marker({
-        element,
-        anchor: "bottom",
+        element: root,
+        anchor: "center",
         clickTolerance: 8,
       })
         .setLngLat([pin.lng, pin.lat])
         .addTo(map);
 
-      return { marker, element };
+      entries.set(pin.id, { marker, root, button });
     });
-  }, [mapReady, onSelectPin, openPopup, pins]);
+  }, [mapReady, pins]);
 
   useEffect(() => {
-    markerEntriesRef.current.forEach(({ element }) => {
-      const isHighlighted = element.dataset.pinId === highlightedPinId;
-      element.classList.toggle("ring-4", isHighlighted);
-      element.classList.toggle("ring-white/80", isHighlighted);
-      element.classList.toggle("shadow-2xl", isHighlighted);
-      element.style.zIndex = isHighlighted ? "10" : "1";
+    markerEntriesRef.current.forEach(({ button, root }) => {
+      const isHighlighted = root.dataset.pinId === highlightedPinId;
+      button.classList.toggle("ring-4", isHighlighted);
+      button.classList.toggle("ring-white/80", isHighlighted);
+      button.classList.toggle("shadow-2xl", isHighlighted);
+      root.style.zIndex = isHighlighted ? "10" : "1";
     });
   }, [highlightedPinId]);
 
   useEffect(() => {
-    if (!selectedPinId || !mapReady) return;
+    if (!popupRequest || !mapReady) return;
 
-    const pin = pins.find((candidate) => candidate.id === selectedPinId);
-    if (pin) openPopup(pin, true);
-  }, [mapReady, openPopup, pins, selectedPinId]);
+    const pin = pinsRef.current.find(
+      (candidate) => candidate.id === popupRequest.pinId,
+    );
+    if (pin) openPopup(pin, popupRequest.fly);
+  }, [mapReady, openPopup, popupRequest]);
 
   return (
     <div className="relative h-[100svh] w-full overflow-hidden bg-[#0d1412]">
@@ -279,6 +266,38 @@ export default function MapView({
           </div>
         </div>
       ) : null}
+
+      <aside
+        aria-label="Selected favorite spot"
+        className={[
+          "fixed bottom-0 right-0 z-40 w-full p-3 transition duration-300 ease-out sm:bottom-4 sm:right-4 sm:top-4 sm:w-[420px] sm:p-0",
+          activePin
+            ? "translate-x-0 opacity-100"
+            : "pointer-events-none translate-x-full opacity-0",
+        ].join(" ")}
+      >
+        <div className="relative h-full max-h-[calc(100svh-1.5rem)] overflow-hidden rounded-[1.35rem] bg-white shadow-2xl shadow-black/35">
+          <button
+            type="button"
+            aria-label="Close spot details"
+            onClick={() => setActivePin(null)}
+            className="absolute right-3 top-3 z-10 rounded-full border border-white/40 bg-black/55 p-2 text-white shadow-lg backdrop-blur transition hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white"
+          >
+            <X aria-hidden="true" className="h-4 w-4" />
+          </button>
+
+          {activePin ? (
+            <PinPopup
+              pin={activePin}
+              canDelete={canDeletePin(activePin, anonymousUserId)}
+              onDelete={() => {
+                setActivePin(null);
+                onDeletePin(activePin.id);
+              }}
+            />
+          ) : null}
+        </div>
+      </aside>
     </div>
   );
 }

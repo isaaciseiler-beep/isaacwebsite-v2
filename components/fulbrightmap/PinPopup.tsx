@@ -31,8 +31,8 @@ export default function PinPopup({
   onDelete: () => void;
 }) {
   return (
-    <article className="w-[280px] overflow-hidden rounded-[1.25rem] bg-white text-neutral-950 shadow-2xl sm:w-[320px]">
-      <div className="relative h-40 w-full overflow-hidden bg-neutral-200">
+    <article className="flex h-full w-full flex-col overflow-hidden bg-white text-neutral-950">
+      <div className="relative h-[42svh] max-h-[420px] min-h-64 w-full shrink-0 overflow-hidden bg-neutral-200 sm:h-[48%]">
         <img
           src={pin.imageUrl}
           alt={pin.placeName}
@@ -42,19 +42,19 @@ export default function PinPopup({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
         <div className="absolute bottom-3 left-3 right-3">
-          <h2 className="line-clamp-2 text-xl font-semibold leading-tight text-white">
+          <h2 className="line-clamp-3 text-3xl font-semibold leading-tight text-white">
             {pin.placeName}
           </h2>
         </div>
       </div>
 
-      <div className="space-y-3 p-4">
+      <div className="flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto p-5">
         <div className="flex items-center gap-2 text-sm text-neutral-600">
           <UserRound aria-hidden="true" className="h-4 w-4 text-neutral-500" />
           <span>Shared by {pin.authorName}</span>
         </div>
-        <p className="text-sm leading-5 text-neutral-800">{pin.caption}</p>
-        <div className="flex items-center justify-between gap-3 border-t border-neutral-200 pt-3">
+        <p className="text-base leading-7 text-neutral-800">{pin.caption}</p>
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-neutral-200 pt-4">
           <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
             <Clock aria-hidden="true" className="h-3.5 w-3.5" />
             {relativeTime(pin.createdAt)}
