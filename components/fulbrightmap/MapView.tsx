@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import mapboxgl, { type LngLatLike, type MapMouseEvent } from "mapbox-gl";
+import mapboxgl, {
+  type LngLatLike,
+  type MapMouseEvent,
+  type PaddingOptions,
+} from "mapbox-gl";
 
 import { canDeletePin } from "@/lib/fulbrightmap/storage";
 import type { PendingLocation, Pin } from "@/lib/fulbrightmap/types";
@@ -22,6 +26,28 @@ type MarkerEntry = {
 
 function stopMarkerEvent(event: Event) {
   event.stopPropagation();
+}
+
+function getPopupCameraPadding(): PaddingOptions {
+  if (typeof window === "undefined") {
+    return { top: 0, right: 0, bottom: 0, left: 0 };
+  }
+
+  if (window.innerWidth >= 640) {
+    return {
+      top: 0,
+      right: Math.min(460, window.innerWidth * 0.36),
+      bottom: 0,
+      left: 0,
+    };
+  }
+
+  return {
+    top: 0,
+    right: 0,
+    bottom: Math.min(360, window.innerHeight * 0.46),
+    left: 0,
+  };
 }
 
 export default function MapView({
@@ -71,7 +97,7 @@ export default function MapView({
     });
 
     mapRef.current = map;
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-left");
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-left");
 
     const handleLoad = () => {
@@ -137,17 +163,33 @@ export default function MapView({
     const map = mapRef.current;
     if (!map) return;
 
+    const center: LngLatLike = [pin.lng, pin.lat];
+    const padding = getPopupCameraPadding();
+
+    setActivePin(pin);
+    map.stop();
+
     if (fly) {
       map.flyTo({
-        center: [pin.lng, pin.lat],
+        center,
         zoom: Math.max(map.getZoom(), 13.2),
+        padding,
+        retainPadding: false,
         speed: 0.75,
         curve: 1.25,
         essential: true,
       });
+      return;
     }
 
-    setActivePin(pin);
+    map.easeTo({
+      center,
+      padding,
+      retainPadding: false,
+      duration: 650,
+      easing: (time) => 1 - Math.pow(1 - time, 3),
+      essential: true,
+    });
   }, []);
 
   const openPopupRef = useRef(openPopup);
@@ -181,7 +223,7 @@ export default function MapView({
       button.type = "button";
       button.setAttribute("aria-label", `Open ${pin.placeName}`);
       button.className =
-        "group relative h-12 w-12 rounded-full border-2 border-white/95 bg-neutral-900 shadow-xl hover:border-white focus:outline-none focus:ring-4 focus:ring-white/70";
+        "group relative h-12 w-12 rounded-full border-2 border-white/95 bg-neutral-900 shadow-xl transition-[border-color,box-shadow,filter] duration-150 hover:border-white hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-white/70";
       button.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.2)), url("${pin.imageUrl}")`;
       button.style.backgroundSize = "cover";
       button.style.backgroundPosition = "center";
@@ -247,7 +289,7 @@ export default function MapView({
   }, [mapReady, openPopup, popupRequest]);
 
   return (
-    <div className="relative h-[100svh] w-full overflow-hidden bg-[#0d1412]">
+    <div className="fulbright-map-shell relative h-[100svh] w-full overflow-hidden bg-[#0d1412]">
       <div ref={containerRef} className="h-full w-full" />
 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(255,255,255,0.16),transparent_34%),linear-gradient(180deg,rgba(0,0,0,0.24),transparent_32%,rgba(0,0,0,0.28))]" />
@@ -269,14 +311,15 @@ export default function MapView({
 
       <aside
         aria-label="Selected favorite spot"
+        data-state={activePin ? "open" : "closed"}
         className={[
-          "fixed bottom-0 right-0 z-40 w-full p-3 transition duration-300 ease-out sm:bottom-4 sm:right-4 sm:top-4 sm:w-[420px] sm:p-0",
+          "fulbright-detail-panel fixed bottom-0 right-0 z-40 w-full p-3 transition duration-300 ease-out sm:bottom-4 sm:right-4 sm:top-4 sm:w-[420px] sm:p-0",
           activePin
             ? "translate-x-0 opacity-100"
             : "pointer-events-none translate-x-full opacity-0",
         ].join(" ")}
       >
-        <div className="relative h-full max-h-[calc(100svh-1.5rem)] overflow-hidden rounded-[1.35rem] bg-white shadow-2xl shadow-black/35">
+        <div className="fulbright-detail-card relative h-full max-h-[calc(100svh-1.5rem)] overflow-hidden rounded-[1.35rem] bg-white shadow-2xl shadow-black/35 ring-1 ring-black/5">
           <button
             type="button"
             aria-label="Close spot details"

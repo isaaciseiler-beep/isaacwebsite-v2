@@ -123,11 +123,11 @@ export default function AddPinForm({
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-pin-title"
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+      className="fulbright-modal-scrim fixed inset-0 z-[70] flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-6"
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg overflow-hidden rounded-[1.5rem] border border-white/15 bg-neutral-950 text-white shadow-2xl"
+        className="fulbright-modal-card w-full max-w-lg overflow-hidden rounded-[1.5rem] border border-white/15 bg-neutral-950 text-white shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
           <div>
@@ -239,14 +239,14 @@ export default function AddPinForm({
             type="button"
             onClick={onDismiss}
             disabled={submitting}
-            className="h-11 rounded-full px-4 text-sm font-semibold text-white/75 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/70 disabled:opacity-40"
+            className="h-11 rounded-full px-4 text-sm font-semibold text-white/75 transition duration-200 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/70 disabled:opacity-40"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 shadow-lg shadow-black/25 transition hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-white/80 disabled:cursor-wait disabled:bg-white/15 disabled:text-white/55 disabled:shadow-none"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 shadow-lg shadow-black/25 transition duration-200 hover:-translate-y-0.5 hover:bg-neutral-200 hover:shadow-xl hover:shadow-black/35 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-white/80 disabled:cursor-wait disabled:bg-white/15 disabled:text-white/55 disabled:shadow-none disabled:hover:translate-y-0"
           >
             {submitting ? (
               <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />

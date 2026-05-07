@@ -2,7 +2,7 @@
 -- Run this in the Supabase SQL editor, then create a public storage bucket
 -- named `fulbrightmap-pin-images`.
 
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema extensions;
 
 create table if not exists public.pins (
   id uuid primary key default gen_random_uuid(),
@@ -53,7 +53,7 @@ create or replace function public.delete_pin(
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   deleted_count integer;
@@ -61,7 +61,7 @@ begin
   delete from public.pins
   where id = pin_id
     and (
-      delete_token_hash = encode(digest(delete_token, 'sha256'), 'hex')
+      delete_token_hash = encode(extensions.digest(delete_token, 'sha256'), 'hex')
       or anonymous_user_id = requester_anonymous_user_id
     );
 
