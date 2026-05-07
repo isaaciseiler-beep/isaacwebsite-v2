@@ -45,7 +45,11 @@ create policy "Anonymous visitors can create pins"
 
 drop policy if exists "Anonymous visitors can delete pins" on public.pins;
 
-create or replace function public.delete_pin(pin_id uuid, delete_token text)
+create or replace function public.delete_pin(
+  pin_id uuid,
+  delete_token text,
+  requester_anonymous_user_id text default ''
+)
 returns boolean
 language plpgsql
 security definer
@@ -56,14 +60,17 @@ declare
 begin
   delete from public.pins
   where id = pin_id
-    and delete_token_hash = encode(digest(delete_token, 'sha256'), 'hex');
+    and (
+      delete_token_hash = encode(digest(delete_token, 'sha256'), 'hex')
+      or anonymous_user_id = requester_anonymous_user_id
+    );
 
   get diagnostics deleted_count = row_count;
   return deleted_count > 0;
 end;
 $$;
 
-grant execute on function public.delete_pin(uuid, text) to anon, authenticated;
+grant execute on function public.delete_pin(uuid, text, text) to anon, authenticated;
 
 -- Storage setup:
 -- 1. In Supabase Dashboard > Storage, create a bucket named

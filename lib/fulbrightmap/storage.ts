@@ -133,11 +133,7 @@ export function getStorageMode(): StorageMode {
 }
 
 export function canDeletePin(pin: Pin, anonymousUserId: string) {
-  if (getStorageMode() === "local") {
-    return pin.anonymousUserId === anonymousUserId;
-  }
-
-  return Boolean(getDeleteToken(pin.id));
+  return pin.anonymousUserId === anonymousUserId || Boolean(getDeleteToken(pin.id));
 }
 
 export async function getPins(): Promise<Pin[]> {
@@ -230,13 +226,10 @@ export async function deletePin(id: string, anonymousUserId: string) {
   }
 
   const deleteToken = getDeleteToken(id);
-  if (!deleteToken) {
-    throw new Error("This spot can only be deleted from the browser that created it.");
-  }
-
   const { data, error } = await supabase.rpc("delete_pin", {
     pin_id: id,
-    delete_token: deleteToken,
+    delete_token: deleteToken ?? "",
+    requester_anonymous_user_id: anonymousUserId,
   });
 
   if (error) throw new Error(error.message);
